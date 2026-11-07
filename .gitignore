@@ -8,3 +8,6 @@
 
 # Coverage profiles (e.g. go test -coverprofile=cover.out ./...)
 *.out
+
+# Text files templ writes in watch mode (mise run dev)
+*_templ.txt

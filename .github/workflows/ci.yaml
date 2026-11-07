@@ -13,7 +13,7 @@ jobs:
     permissions:
       contents: none
     name: CI
-    needs: [test, lint, formatting, modules, spelling, ifttt-lint]
+    needs: [test, lint, formatting, modules, generated, spelling, ifttt-lint]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     if: always()
@@ -88,6 +88,24 @@ jobs:
         uses: $/.github/actions/setup
       - name: Check go.mod tidiness and module integrity
         run: mise run check-mod
+  generated:
+    name: Generated files
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Setup
+        uses: $/.github/actions/setup
+      - name: Regenerate templ code and the Tailwind stylesheet
+        run: mise run generate
+      - name: Check that generated files are committed and up to date
+        # --intent-to-add makes new, uncommitted files show up in the diff too.
+        run: |
+          git add --intent-to-add .
+          git diff --exit-code
   spelling:
     name: Spelling
     runs-on: ubuntu-latest

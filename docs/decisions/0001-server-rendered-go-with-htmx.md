@@ -1,6 +1,6 @@
 # 0001. Serve server-rendered HTML from Go with templ, htmx, Alpine.js, and Tailwind
 
-- Status: Accepted
+- Status: Accepted, amended by [0004](0004-run-templ-cli-as-go-tool.md)
 - Date: 2026-11-07
 
 ## Context
