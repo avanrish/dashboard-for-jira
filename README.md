@@ -22,3 +22,12 @@ Run `mise install` to provision Go and the development tools pinned in `mise.tom
 - `mise run test` — tests with the race detector
 - `mise run doc` — browse the documentation locally in the pkg.go.dev style
 <!-- LINT.ThenChange(//AGENTS.md:commands, //mise.toml:lint_task) -->
+
+## License
+
+[MIT](LICENSE)
+
+## Disclaimer
+
+This project is not affiliated with, endorsed by, or sponsored by Atlassian.
+Jira is a trademark of Atlassian Pty Ltd.
