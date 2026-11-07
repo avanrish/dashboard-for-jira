@@ -18,15 +18,15 @@ templ boardView(boardData board.Board) {
 }
 
 templ column(col board.Column) {
-	<section class="flex max-h-full w-72 shrink-0 flex-col rounded-lg bg-slate-200/70 dark:bg-slate-900">
-		<h2 class="flex items-center justify-between px-3 pt-3 pb-2 text-xs font-semibold tracking-wide text-slate-600 uppercase dark:text-slate-400">
+	<section class="flex max-h-full w-72 shrink-0 flex-col rounded-lg bg-column">
+		<h2 class="flex items-center justify-between px-3 pt-3 pb-2 text-xs font-semibold tracking-wide text-fg-muted uppercase">
 			{ col.Name }
-			<span class="rounded-full bg-slate-300/80 px-2 py-0.5 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+			<span class="rounded-full bg-chip px-2 py-0.5 text-fg">
 				{ strconv.Itoa(len(col.Issues)) }
 			</span>
 		</h2>
 		if len(col.Issues) == 0 {
-			<p class="px-3 pt-1 pb-4 text-sm text-slate-500">No issues</p>
+			<p class="px-3 pt-1 pb-4 text-sm text-fg-muted">No issues</p>
 		} else {
 			<ul class="flex flex-col gap-2 overflow-y-auto px-2 pb-2">
 				for _, issue := range col.Issues {
@@ -40,9 +40,9 @@ templ column(col board.Column) {
 }
 
 templ card(issue board.Issue) {
-	<article class="rounded-md bg-white p-3 shadow-sm ring-1 ring-slate-900/5 dark:bg-slate-800 dark:ring-white/10">
+	<article class="rounded-md bg-card p-3 shadow-sm ring-1 ring-line">
 		<p class="text-sm leading-snug">{ issue.Summary }</p>
-		<div class="mt-3 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+		<div class="mt-3 flex items-center gap-2 text-xs text-fg-muted">
 			<span class={ "rounded px-1.5 py-0.5 font-medium", typeClass(issue.Type) }>{ issue.Type }</span>
 			<span class="font-mono">{ issue.Key }</span>
 			if issue.Priority != "" {
@@ -55,9 +55,9 @@ templ card(issue board.Issue) {
 
 templ avatar(name string) {
 	if name == "" {
-		<span title="Unassigned" class="ml-auto size-6 rounded-full border border-dashed border-slate-400 dark:border-slate-500"></span>
+		<span title="Unassigned" class="ml-auto size-6 rounded-full border border-dashed border-fg-muted"></span>
 	} else {
-		<span title={ name } class="ml-auto flex size-6 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-semibold text-white">
+		<span title={ name } class="ml-auto flex size-6 items-center justify-center rounded-full bg-accent text-[10px] font-semibold text-on-accent">
 			{ initials(name) }
 		</span>
 	}
@@ -67,13 +67,13 @@ templ avatar(name string) {
 func typeClass(issueType string) string {
 	switch issueType {
 	case "Story":
-		return "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+		return "bg-story-soft text-story"
 	case "Bug":
-		return "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
+		return "bg-bug-soft text-bug"
 	case "Task":
-		return "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300"
+		return "bg-task-soft text-task"
 	default:
-		return "bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200"
+		return "bg-chip text-fg"
 	}
 }
 

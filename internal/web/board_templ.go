@@ -70,7 +70,7 @@ func column(col board.Column) templ.Component {
 		}
 		ctx = templ.InitializeContext(ctx)
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<section class=\"flex max-h-full w-72 shrink-0 flex-col rounded-lg bg-slate-200/70 dark:bg-slate-900\"><h2 class=\"flex items-center justify-between px-3 pt-3 pb-2 text-xs font-semibold tracking-wide text-slate-600 uppercase dark:text-slate-400\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<section class=\"flex max-h-full w-72 shrink-0 flex-col rounded-lg bg-column\"><h2 class=\"flex items-center justify-between px-3 pt-3 pb-2 text-xs font-semibold tracking-wide text-fg-muted uppercase\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -83,7 +83,7 @@ func column(col board.Column) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " <span class=\"rounded-full bg-slate-300/80 px-2 py-0.5 text-slate-700 dark:bg-slate-800 dark:text-slate-300\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " <span class=\"rounded-full bg-chip px-2 py-0.5 text-fg\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -101,7 +101,7 @@ func column(col board.Column) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if len(col.Issues) == 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<p class=\"px-3 pt-1 pb-4 text-sm text-slate-500\">No issues</p>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<p class=\"px-3 pt-1 pb-4 text-sm text-fg-muted\">No issues</p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -154,7 +154,7 @@ func card(issue board.Issue) templ.Component {
 		}
 		ctx = templ.InitializeContext(ctx)
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<article class=\"rounded-md bg-white p-3 shadow-sm ring-1 ring-slate-900/5 dark:bg-slate-800 dark:ring-white/10\"><p class=\"text-sm leading-snug\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<article class=\"rounded-md bg-card p-3 shadow-sm ring-1 ring-line\"><p class=\"text-sm leading-snug\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -167,7 +167,7 @@ func card(issue board.Issue) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</p><div class=\"mt-3 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</p><div class=\"mt-3 flex items-center gap-2 text-xs text-fg-muted\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -286,7 +286,7 @@ func avatar(name string) templ.Component {
 		ctx = templ.InitializeContext(ctx)
 		ctx = templ.ClearChildren(ctx)
 		if name == "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<span title=\"Unassigned\" class=\"ml-auto size-6 rounded-full border border-dashed border-slate-400 dark:border-slate-500\"></span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<span title=\"Unassigned\" class=\"ml-auto size-6 rounded-full border border-dashed border-fg-muted\"></span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -304,7 +304,7 @@ func avatar(name string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" class=\"ml-auto flex size-6 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-semibold text-white\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" class=\"ml-auto flex size-6 items-center justify-center rounded-full bg-accent text-[10px] font-semibold text-on-accent\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -330,13 +330,13 @@ func avatar(name string) templ.Component {
 func typeClass(issueType string) string {
 	switch issueType {
 	case "Story":
-		return "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+		return "bg-story-soft text-story"
 	case "Bug":
-		return "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
+		return "bg-bug-soft text-bug"
 	case "Task":
-		return "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300"
+		return "bg-task-soft text-task"
 	default:
-		return "bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200"
+		return "bg-chip text-fg"
 	}
 }
 

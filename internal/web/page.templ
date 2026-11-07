@@ -11,8 +11,8 @@ templ page(boardData board.Board) {
 			<title>{ boardData.Name } · Dashboard for Jira</title>
 			<link rel="stylesheet" href="/static/app.css"/>
 		</head>
-		<body class="flex h-full flex-col bg-slate-100 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100">
-			<header class="flex items-center gap-4 border-b border-slate-200 bg-white px-6 py-3 dark:border-slate-800 dark:bg-slate-900">
+		<body class="flex h-full flex-col bg-page text-fg antialiased">
+			<header class="flex items-center gap-4 border-b border-line bg-surface px-6 py-3">
 				<h1 class="text-lg font-semibold">{ boardData.Name }</h1>
 			</header>
 			<main class="min-h-0 flex-1 overflow-x-auto p-6">

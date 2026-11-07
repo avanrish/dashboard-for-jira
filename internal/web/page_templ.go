@@ -41,7 +41,7 @@ func page(boardData board.Board) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " · Dashboard for Jira</title><link rel=\"stylesheet\" href=\"/static/app.css\"></head><body class=\"flex h-full flex-col bg-slate-100 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100\"><header class=\"flex items-center gap-4 border-b border-slate-200 bg-white px-6 py-3 dark:border-slate-800 dark:bg-slate-900\"><h1 class=\"text-lg font-semibold\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " · Dashboard for Jira</title><link rel=\"stylesheet\" href=\"/static/app.css\"></head><body class=\"flex h-full flex-col bg-page text-fg antialiased\"><header class=\"flex items-center gap-4 border-b border-line bg-surface px-6 py-3\"><h1 class=\"text-lg font-semibold\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
