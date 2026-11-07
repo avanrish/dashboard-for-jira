@@ -10,55 +10,127 @@ import (
 )
 
 templ boardView(boardData board.Board) {
-	<div id="board" class="flex h-full items-start gap-4">
-		for _, col := range boardData.Columns {
-			@column(col)
+	<div class="w-max min-w-full px-6 pb-6">
+		<div class="sticky top-0 z-10 flex gap-2 bg-page pt-4 pb-1">
+			for i, name := range boardData.Columns {
+				<h2 class="flex w-50 shrink-0 items-center justify-between rounded-lg bg-column px-2.5 py-1.5 text-xs font-semibold tracking-wide text-fg-muted uppercase">
+					{ name }
+					<span class="rounded-full bg-chip px-2 py-0.5 text-fg">
+						{ strconv.Itoa(boardData.ColumnIssueCount(i)) }
+					</span>
+				</h2>
+			}
+		</div>
+		if len(boardData.Lanes) == 0 {
+			<p class="mt-4 text-sm text-fg-muted">No issues on this board.</p>
+		}
+		for _, lane := range boardData.Lanes {
+			@epicLane(lane)
 		}
 	</div>
 }
 
-templ column(col board.Column) {
-	<section class="flex max-h-full w-72 shrink-0 flex-col rounded-lg bg-column">
-		<h2 class="flex items-center justify-between px-3 pt-3 pb-2 text-xs font-semibold tracking-wide text-fg-muted uppercase">
-			{ col.Name }
-			<span class="rounded-full bg-chip px-2 py-0.5 text-fg">
-				{ strconv.Itoa(len(col.Issues)) }
-			</span>
-		</h2>
-		if len(col.Issues) == 0 {
-			<p class="px-3 pt-1 pb-4 text-sm text-fg-muted">No issues</p>
-		} else {
-			<ul class="flex flex-col gap-2 overflow-y-auto px-2 pb-2">
-				for _, issue := range col.Issues {
-					<li>
-						@card(issue)
-					</li>
-				}
-			</ul>
-		}
-	</section>
+// epicLane uses <details> so lanes collapse and expand without JavaScript.
+templ epicLane(lane board.Lane) {
+	<details open class="group mt-3">
+		<summary class="sticky left-6 flex w-fit cursor-pointer list-none items-center gap-2 py-1 text-sm [&::-webkit-details-marker]:hidden">
+			<svg class="size-4 shrink-0 text-fg-muted transition-transform group-open:rotate-90" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+				<path d="M6 3.5 10.5 8 6 12.5"></path>
+			</svg>
+			if lane.Epic.Key == "" {
+				<span class="font-medium text-fg-muted">Issues without epic</span>
+			} else {
+				<span class={ "size-3.5 shrink-0 rounded-[3px]", epicClass(lane.Epic.Color) }></span>
+				<a href={ templ.URL(lane.Epic.URL) } class="font-mono text-xs text-fg-muted hover:underline">{ lane.Epic.Key }</a>
+				<span class="font-medium">{ lane.Epic.Summary }</span>
+			}
+			<span class="text-fg-muted">{ issueCount(lane.IssueCount()) }</span>
+		</summary>
+		<div class="mt-1 flex gap-2">
+			for _, issues := range lane.Cells {
+				<ul class="flex min-h-10 w-50 shrink-0 flex-col gap-1.5 rounded-lg bg-column p-1.5">
+					for _, issue := range issues {
+						<li>
+							@card(issue)
+						</li>
+					}
+				</ul>
+			}
+		</div>
+	</details>
 }
 
 templ card(issue board.Issue) {
-	<article class="rounded-md bg-card p-3 shadow-sm ring-1 ring-line">
-		<p class="text-sm leading-snug">{ issue.Summary }</p>
-		<div class="mt-3 flex items-center gap-2 text-xs text-fg-muted">
-			<span class={ "rounded px-1.5 py-0.5 font-medium", typeClass(issue.Type) }>{ issue.Type }</span>
-			<span class="font-mono">{ issue.Key }</span>
-			if issue.Priority != "" {
-				<span title="Priority">{ issue.Priority }</span>
+	<a href={ templ.URL(issue.URL) } title={ issue.Summary } class="block rounded-md bg-card p-2 shadow-sm ring-1 ring-line hover:ring-accent focus-visible:outline-2 focus-visible:outline-accent">
+		<p class="line-clamp-3 text-sm leading-snug">{ issue.Summary }</p>
+		<div class="mt-2 flex items-center gap-2 text-xs text-fg-muted">
+			<span class={ "max-w-full shrink-0 truncate rounded px-1.5 py-0.5 text-[11px] font-semibold uppercase", statusClass(issue.StatusCategory) }>{ issue.Status }</span>
+			if issue.Team != "" {
+				<span title="Team" class="truncate">{ issue.Team }</span>
 			}
-			@avatar(issue.Assignee)
 		</div>
-	</article>
+		<div class="mt-1.5 flex items-center gap-1.5 text-xs text-fg-muted">
+			@typeIcon(issue.Type)
+			<span class="font-mono whitespace-nowrap">{ issue.Key }</span>
+			<span class="ml-auto flex shrink-0 items-center gap-1.5">
+				@priorityIcon(issue.Priority)
+				@avatar(issue.Assignee, issue.AssigneeAvatar)
+			</span>
+		</div>
+	</a>
 }
 
-templ avatar(name string) {
+// typeIcon draws common issue types as a glyph on a coloured square; other types show their initials.
+templ typeIcon(issueType string) {
+	<span title={ issueType } role="img" aria-label={ issueType } class={ "flex size-4 shrink-0 items-center justify-center rounded-[3px]", typeClass(issueType) }>
+		switch issueType {
+			case "Story":
+				<svg class="size-3" viewBox="0 0 12 12" aria-hidden="true">
+					<path d="M3.5 2h5v8.5L6 8.75 3.5 10.5z" fill="currentColor"></path>
+				</svg>
+			case "Bug":
+				<svg class="size-3" viewBox="0 0 12 12" aria-hidden="true">
+					<circle cx="6" cy="6" r="2.75" fill="currentColor"></circle>
+				</svg>
+			case "Task":
+				<svg class="size-3" viewBox="0 0 12 12" aria-hidden="true">
+					<path d="M3 6.25 5.25 8.5 9 4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"></path>
+				</svg>
+			case "Subtask", "Sub-task":
+				<svg class="size-3" viewBox="0 0 12 12" aria-hidden="true">
+					<rect x="2.5" y="2.5" width="4.5" height="4.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.25"></rect>
+					<rect x="5" y="5" width="4.5" height="4.5" rx="1" fill="currentColor"></rect>
+				</svg>
+			default:
+				<span class="text-[8px] leading-none font-bold">{ initials(issueType) }</span>
+		}
+	</span>
+}
+
+// priorityIcon draws the usual Jira priorities as arrows; other priority names show as text.
+templ priorityIcon(priority string) {
+	{{ path, colorClass := priorityShape(priority) }}
+	if path != "" {
+		<span title={ priority } role="img" aria-label={ priority } class={ "shrink-0", colorClass }>
+			<svg class="size-4" viewBox="0 0 16 16" aria-hidden="true">
+				<path d={ path } fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+			</svg>
+		</span>
+	} else if priority != "" {
+		<span title="Priority">{ priority }</span>
+	}
+}
+
+// avatar lays Jira's avatar picture over our initials. With an empty alt, a picture that fails to load shows nothing, so the initials stay visible.
+templ avatar(name, pictureURL string) {
 	if name == "" {
-		<span title="Unassigned" class="ml-auto size-6 rounded-full border border-dashed border-fg-muted"></span>
+		<span title="Unassigned" class="size-5 shrink-0 rounded-full border border-dashed border-fg-muted"></span>
 	} else {
-		<span title={ name } class="ml-auto flex size-6 items-center justify-center rounded-full bg-accent text-[10px] font-semibold text-on-accent">
+		<span title={ name } class="relative flex size-5 shrink-0 items-center justify-center rounded-full bg-accent text-[9px] font-semibold text-on-accent">
 			{ initials(name) }
+			if pictureURL != "" {
+				<img src={ templ.URL(pictureURL) } alt="" loading="lazy" referrerpolicy="no-referrer" class="absolute inset-0 size-full rounded-full object-cover"/>
+			}
 		</span>
 	}
 }
@@ -67,14 +139,85 @@ templ avatar(name string) {
 func typeClass(issueType string) string {
 	switch issueType {
 	case "Story":
-		return "bg-story-soft text-story"
+		return "bg-story text-on-accent"
 	case "Bug":
-		return "bg-bug-soft text-bug"
-	case "Task":
-		return "bg-task-soft text-task"
+		return "bg-bug text-on-accent"
+	case "Task", "Subtask", "Sub-task":
+		return "bg-task text-on-accent"
 	default:
 		return "bg-chip text-fg"
 	}
+}
+
+// priorityShape returns an arrow path and colour for the usual Jira priority names, and nothing for others.
+func priorityShape(priority string) (path, colorClass string) {
+	switch priority {
+	case "Highest", "Blocker", "Critical":
+		return "M4 8l4-4 4 4M4 12l4-4 4 4", "text-priority-high"
+	case "High", "Major":
+		return "M4 10l4-4 4 4", "text-priority-high"
+	case "Medium":
+		return "M4 6h8M4 10h8", "text-priority-medium"
+	case "Low", "Minor":
+		return "M4 6l4 4 4-4", "text-priority-low"
+	case "Lowest", "Trivial":
+		return "M4 4l4 4 4-4M4 8l4 4 4-4", "text-priority-low"
+	}
+	return "", ""
+}
+
+// epicClass fills an epic's square with its colour from Jira; epics without one use the epic role.
+func epicClass(color string) string {
+	switch color {
+	case "dark-gray":
+		return "bg-epic-dark-gray"
+	case "dark-yellow":
+		return "bg-epic-dark-yellow"
+	case "yellow":
+		return "bg-epic-yellow"
+	case "dark-blue":
+		return "bg-epic-dark-blue"
+	case "dark-teal":
+		return "bg-epic-dark-teal"
+	case "green":
+		return "bg-epic-green"
+	case "purple":
+		return "bg-epic-purple"
+	case "dark-purple":
+		return "bg-epic-dark-purple"
+	case "orange":
+		return "bg-epic-orange"
+	case "blue":
+		return "bg-epic-blue"
+	case "teal":
+		return "bg-epic-teal"
+	case "gray":
+		return "bg-epic-gray"
+	case "dark-green":
+		return "bg-epic-dark-green"
+	case "dark-orange":
+		return "bg-epic-dark-orange"
+	default:
+		return "bg-epic"
+	}
+}
+
+func statusClass(category board.StatusCategory) string {
+	switch category {
+	case board.InProgress:
+		return "bg-progress-soft text-progress"
+	case board.Done:
+		return "bg-done-soft text-done"
+	default:
+		return "bg-chip text-fg"
+	}
+}
+
+func issueCount(count int) string {
+	if count == 1 {
+		return "1 issue"
+	}
+	return strconv.Itoa(count) + " issues"
 }
 
 // initials takes the first and last words, so "Ada King Lovelace" gives "AL".

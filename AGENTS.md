@@ -39,6 +39,13 @@ Each role has a light and a dark value, so templates need no `dark:` classes; wh
 CI also runs checks that `mise run lint` does not: `typos`, `ifttt-lint`, and `gitleaks`. Their tools are pinned in `mise.ci.toml`; install them with `MISE_ENV=ci mise install`, then run `typos` and `ifttt-lint --diff 'main..@'` (`main...HEAD` with git) before pushing.
 CI runs tests on Linux.
 
+## Configuration
+
+<!-- LINT.IfChange(configuration) -->
+The server reads its settings from environment variables and from a `.env` file in the current directory; variables set in the environment take precedence.
+Copy `.env.example` to `.env` and fill in your Jira site, email, API token, and board ID before running the server.
+<!-- LINT.ThenChange(//README.md:configuration) -->
+
 ## Conventions
 
 <!-- LINT.IfChange(commit_subject) -->

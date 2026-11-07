@@ -2,22 +2,37 @@ package web
 
 import "github.com/avanrish/dashboard-for-jira/internal/board"
 
-templ page(boardData board.Board) {
+templ layout(title string) {
 	<!DOCTYPE html>
 	<html lang="en" class="h-full">
 		<head>
 			<meta charset="utf-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
-			<title>{ boardData.Name } · Dashboard for Jira</title>
+			<title>{ title }</title>
 			<link rel="stylesheet" href="/static/app.css"/>
 		</head>
 		<body class="flex h-full flex-col bg-page text-fg antialiased">
-			<header class="flex items-center gap-4 border-b border-line bg-surface px-6 py-3">
-				<h1 class="text-lg font-semibold">{ boardData.Name }</h1>
-			</header>
-			<main class="min-h-0 flex-1 overflow-x-auto p-6">
-				@boardView(boardData)
-			</main>
+			{ children... }
 		</body>
 	</html>
+}
+
+templ page(boardData board.Board) {
+	@layout(boardData.Name + " · Dashboard for Jira") {
+		<header class="flex items-center gap-4 border-b border-line bg-surface px-6 py-3">
+			<h1 class="text-lg font-semibold">{ boardData.Name }</h1>
+		</header>
+		<main class="min-h-0 flex-1 overflow-auto">
+			@boardView(boardData)
+		</main>
+	}
+}
+
+templ errorPage(message string) {
+	@layout("Error · Dashboard for Jira") {
+		<main class="m-auto max-w-xl p-6">
+			<h1 class="text-lg font-semibold">Could not load the board</h1>
+			<p class="mt-2 text-sm text-fg-muted">{ message }</p>
+		</main>
+	}
 }

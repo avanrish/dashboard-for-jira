@@ -21,13 +21,39 @@
   --color-accent: oklch(51.1% 0.262 276.966); /* indigo-600 */
   --color-on-accent: #fff; /* text on accent */
 
-  /* Issue type badges: text and a soft background for each. */
-  --color-story: oklch(43.2% 0.095 166.913); /* emerald-800 */
-  --color-story-soft: oklch(95% 0.052 163.051); /* emerald-100 */
-  --color-bug: oklch(44.4% 0.177 26.899); /* red-800 */
-  --color-bug-soft: oklch(93.6% 0.032 17.717); /* red-100 */
-  --color-task: oklch(44.3% 0.11 240.79); /* sky-800 */
-  --color-task-soft: oklch(95.1% 0.026 236.824); /* sky-100 */
+  /* Issue type icons: a glyph in on-accent on these backgrounds. */
+  --color-story: oklch(59.6% 0.145 163.225); /* emerald-600 */
+  --color-bug: oklch(57.7% 0.245 27.325); /* red-600 */
+  --color-task: oklch(58.8% 0.158 241.966); /* sky-600 */
+
+  /* Priority icons. */
+  --color-priority-high: oklch(57.7% 0.245 27.325); /* red-600 */
+  --color-priority-medium: oklch(76.9% 0.188 70.08); /* amber-500 */
+  --color-priority-low: oklch(54.6% 0.245 262.881); /* blue-600 */
+
+  --color-epic: oklch(43.2% 0.232 292.759); /* violet-800, epics without a colour */
+
+  /* Status badges: text and a soft background for each category. */
+  --color-progress: oklch(42.4% 0.199 265.638); /* blue-800 */
+  --color-progress-soft: oklch(93.2% 0.032 255.585); /* blue-100 */
+  --color-done: oklch(44.8% 0.119 151.328); /* green-800 */
+  --color-done-soft: oklch(96.2% 0.044 156.743); /* green-100 */
+
+  /* Jira's epic colours, the same in both themes, as Atlassian documents them for the codes ghx-label-1 to 14. */
+  --color-epic-dark-gray: #243859;
+  --color-epic-dark-yellow: #fa9920;
+  --color-epic-yellow: #fac304;
+  --color-epic-dark-blue: #2a53cc;
+  --color-epic-dark-teal: #2aa3bf;
+  --color-epic-green: #58d8a4;
+  --color-epic-purple: #8677d9;
+  --color-epic-dark-purple: #5244aa;
+  --color-epic-orange: #fa7353;
+  --color-epic-blue: #3884ff;
+  --color-epic-teal: #34c7e6;
+  --color-epic-gray: #6b778c;
+  --color-epic-dark-green: #128759;
+  --color-epic-dark-orange: #dd350d;
 }
 
 /* Not `@theme inline`: that copies the light values into the classes, and this block would have no effect. */
@@ -38,17 +64,24 @@
     --color-column: oklch(20.8% 0.042 265.755); /* slate-900 */
     --color-card: oklch(27.9% 0.041 260.031); /* slate-800 */
     --color-line: oklch(37.2% 0.044 257.287); /* slate-700 */
-    --color-chip: oklch(27.9% 0.041 260.031); /* slate-800 */
+    --color-chip: oklch(37.2% 0.044 257.287); /* slate-700, lighter than cards */
     --color-fg: oklch(96.8% 0.007 247.896); /* slate-100 */
     --color-fg-muted: oklch(70.4% 0.04 256.788); /* slate-400 */
     --color-accent: oklch(58.5% 0.233 277.117); /* indigo-500 */
     --color-on-accent: #fff;
 
-    --color-story: oklch(84.5% 0.143 164.978); /* emerald-300 */
-    --color-story-soft: oklch(26.2% 0.051 172.552); /* emerald-950 */
-    --color-bug: oklch(80.8% 0.114 19.571); /* red-300 */
-    --color-bug-soft: oklch(25.8% 0.092 26.042); /* red-950 */
-    --color-task: oklch(82.8% 0.111 230.318); /* sky-300 */
-    --color-task-soft: oklch(29.3% 0.066 243.157); /* sky-950 */
+    --color-story: oklch(69.6% 0.17 162.48); /* emerald-500 */
+    --color-bug: oklch(63.7% 0.237 25.331); /* red-500 */
+    --color-task: oklch(68.5% 0.169 237.323); /* sky-500 */
+
+    --color-priority-high: oklch(70.4% 0.191 22.216); /* red-400 */
+    --color-priority-medium: oklch(82.8% 0.189 84.429); /* amber-400 */
+    --color-priority-low: oklch(70.7% 0.165 254.624); /* blue-400 */
+
+    --color-epic: oklch(81.1% 0.111 293.571); /* violet-300 */
+    --color-progress: oklch(80.9% 0.105 251.813); /* blue-300 */
+    --color-progress-soft: oklch(28.2% 0.091 267.935); /* blue-950 */
+    --color-done: oklch(87.1% 0.15 154.449); /* green-300 */
+    --color-done-soft: oklch(26.6% 0.065 152.934); /* green-950 */
   }
 }

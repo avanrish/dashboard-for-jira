@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/a-h/templ"
 
@@ -36,17 +37,24 @@ func NewHandler(boards BoardSource, logger *slog.Logger) http.Handler {
 }
 
 func (s *server) handlePage(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
 	boardData, err := s.boards.Board(r.Context())
-	if err != nil {
-		s.logger.ErrorContext(r.Context(), "loading the board", "err", err)
-		http.Error(w, "Could not load the board.", http.StatusBadGateway)
-		return
+	duration := time.Since(start).Round(time.Millisecond)
+	switch {
+	case r.Context().Err() != nil:
+		s.logger.InfoContext(r.Context(), "the browser left before the board loaded", "duration", duration)
+	case err != nil:
+		s.logger.ErrorContext(r.Context(), "loading the board", "duration", duration, "err", err)
+		// Not 502: templ's dev proxy retries those for minutes, taking them for a restarting server.
+		s.render(w, r, http.StatusInternalServerError, errorPage(err.Error()))
+	default:
+		s.logger.InfoContext(r.Context(), "loaded the board", "duration", duration)
+		s.render(w, r, http.StatusOK, page(boardData))
 	}
-	s.render(w, r, page(boardData))
 }
 
 // render buffers the output so a template error becomes a clean 500, not a truncated page.
-func (s *server) render(w http.ResponseWriter, r *http.Request, component templ.Component) {
+func (s *server) render(w http.ResponseWriter, r *http.Request, status int, component templ.Component) {
 	var buf bytes.Buffer
 	if err := component.Render(r.Context(), &buf); err != nil {
 		s.logger.ErrorContext(r.Context(), "rendering a page", "err", err)
@@ -54,6 +62,7 @@ func (s *server) render(w http.ResponseWriter, r *http.Request, component templ.
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(status)
 	_, _ = buf.WriteTo(w)
 }
 

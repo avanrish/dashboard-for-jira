@@ -36,6 +36,13 @@ Each role has a light and a dark value, so templates need no `dark:` classes; wh
 - `mise run generate` — regenerate templ code and the Tailwind stylesheet. Run after editing `.templ` files or Tailwind classes, and commit the output; CI fails if it is stale.
 <!-- LINT.ThenChange(//AGENTS.md:web_ui) -->
 
+## Configuration
+
+<!-- LINT.IfChange(configuration) -->
+The server reads its settings from environment variables and from a `.env` file in the current directory; variables set in the environment take precedence.
+Copy `.env.example` to `.env` and fill in your Jira site, email, API token, and board ID before running the server.
+<!-- LINT.ThenChange(//AGENTS.md:configuration) -->
+
 ## License
 
 [MIT](LICENSE)
