@@ -9,6 +9,7 @@ A web dashboard for Jira.
 <!-- LINT.IfChange(project_structure) -->
 - `cmd/<name>/` — one directory per executable; keep `main.go` thin and call into `internal/`
 - `internal/` — application code, not importable by other modules
+- `docs/decisions/` — architecture decision records explaining why the project is built the way it is
 - Tests live next to the code they test as `*_test.go` files, with fixtures in a package-local `testdata/`
 <!-- LINT.ThenChange(//AGENTS.md:project_structure) -->
 

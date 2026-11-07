@@ -9,6 +9,7 @@ A web dashboard for Jira.
 <!-- LINT.IfChange(project_structure) -->
 - `cmd/<name>/` — one directory per executable; keep `main.go` thin and call into `internal/`
 - `internal/` — application code, not importable by other modules
+- `docs/decisions/` — architecture decision records explaining why the project is built the way it is
 - Tests live next to the code they test as `*_test.go` files, with fixtures in a package-local `testdata/`
 <!-- LINT.ThenChange(//README.md:project_structure) -->
 
@@ -33,6 +34,12 @@ CI runs tests on Linux.
 <!-- LINT.ThenChange(//committed.toml:commit_subject) -->
 - Use narrow `LINT.IfChange` / `LINT.ThenChange` directives when duplicated cross-file content must stay in sync and cannot be eliminated.
   Write targets as repository-root paths starting with `//` (e.g. `//mise.toml:go_version`); ifttt-lint enforces them in CI.
+
+## Decisions
+
+Before changing architecture, dependencies, or how the app talks to Jira, read the records in `docs/decisions/`.
+Do not go against an accepted record silently: propose a new record that supersedes it.
+When you make a decision a reader could not work out from the code, add a record following `docs/decisions/README.md`.
 
 ## Version control
 
