@@ -1,18 +1,8 @@
 <!-- LINT.IfChange(project_header) -->
-# {{ project }}
+# dashboard-for-jira
 
-{{ description }}
+A web dashboard for Jira.
 <!-- LINT.ThenChange(//README.md:project_header) -->
-
-<!-- init.sh:start -->
-## Template
-
-This repository is a project template; `init.sh` turns a copy into a real project and deletes this section.
-
-- Keep the `{{ project }}` and `{{ description }}` placeholders and the `template-go` name (module path, `cmd/template-go/`) as they are: `init.sh` substitutes them.
-- If you rename or move anything `init.sh` rewrites, update `init.sh` in the same change.
-- Tests run on Linux only by default; `init.sh` can add macOS and Windows to the CI test matrix, so keep template code and tests portable.
-<!-- init.sh:end -->
 
 ## Project structure
 
@@ -34,9 +24,7 @@ Run `mise install` to provision Go and the development tools pinned in `mise.tom
 <!-- LINT.ThenChange(//README.md:commands, //mise.toml:lint_task) -->
 
 CI also runs checks that `mise run lint` does not: `typos`, `ifttt-lint`, and `gitleaks`. Their tools are pinned in `mise.ci.toml`; install them with `MISE_ENV=ci mise install`, then run `typos` and `ifttt-lint --diff 'main..@'` (`main...HEAD` with git) before pushing.
-<!-- LINT.IfChange(test_os) -->
 CI runs tests on Linux.
-<!-- LINT.ThenChange(//init.sh:test_os) -->
 
 ## Conventions
 

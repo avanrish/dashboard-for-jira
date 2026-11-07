@@ -1,13 +1,8 @@
 <!-- LINT.IfChange(project_header) -->
-# {{ project }}
+# dashboard-for-jira
 
-{{ description }}
+A web dashboard for Jira.
 <!-- LINT.ThenChange(//AGENTS.md:project_header) -->
-
-<!-- init.sh:start -->
-> [!NOTE]
-> Created this project from the template? Run `./init.sh` to set the project name, description, and Go module path. It removes this note and deletes itself.
-<!-- init.sh:end -->
 
 ## Project structure
 

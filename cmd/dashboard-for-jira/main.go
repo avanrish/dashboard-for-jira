@@ -13,6 +13,6 @@ func main() {
 }
 
 func run() error {
-	fmt.Println("hello from template-go")
+	fmt.Println("hello from dashboard-for-jira")
 	return nil
 }

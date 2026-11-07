@@ -25,10 +25,7 @@ jobs:
     name: Test
     strategy:
       matrix:
-        # init.sh can add "macos-latest" and "windows-latest".
-        # LINT.IfChange(test_os)
         os: ["ubuntu-latest"]
-        # LINT.ThenChange(//init.sh:test_os)
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     steps:
