@@ -7,6 +7,7 @@ committed = "1.1.11"
 # LINT.ThenChange(//.github/workflows/committed.yaml:committed_version)
 golangci-lint = "2.15.0"
 "go:golang.org/x/vuln/cmd/govulncheck" = { version = "1.9.0", depends = "go" }
+"aqua:tailwindlabs/tailwindcss" = "4.3.4"
 
 [tasks.fmt]
 description = "Format Go code"
@@ -38,6 +39,32 @@ run = "govulncheck ./..."
 [tasks.test]
 description = "Run tests with the race detector"
 run = "go test -race ./..."
+
+[tasks.generate]
+description = "Generate Go code from templ files and build the Tailwind stylesheet"
+run = [
+  "go tool templ generate",
+  "tailwindcss --input internal/web/tailwind.css --output internal/web/static/app.css --minify",
+]
+
+[tasks.dev]
+description = "Run the server with live reload at http://127.0.0.1:7331"
+depends = ["dev:templ", "dev:css"]
+
+[tasks."dev:templ"]
+description = "Regenerate templ code, rebuild and restart the server, and reload the browser on changes"
+hide = true
+# exec replaces the shell, so templ stops the server itself when it restarts it.
+run = '''go tool templ generate --watch \
+  --watch-pattern='(.+\.go$)|(.+\.templ$)|(.+_templ\.txt$)|(static/app\.css$)' \
+  --cmd='go build -o bin/dashboard-for-jira ./cmd/dashboard-for-jira && exec bin/dashboard-for-jira' \
+  --proxy=http://127.0.0.1:8080'''
+
+[tasks."dev:css"]
+description = "Rebuild the Tailwind stylesheet on changes"
+hide = true
+# Minify like `generate` does, so a dev session leaves the committed file unchanged.
+run = "tailwindcss --input internal/web/tailwind.css --output internal/web/static/app.css --minify --watch=always"
 
 [tasks.doc]
 description = "Browse the documentation locally in the pkg.go.dev style"

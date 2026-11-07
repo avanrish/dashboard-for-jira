@@ -1,0 +1,3 @@
+/* Tailwind entry point. `mise run generate` compiles it into static/app.css. */
+@import "tailwindcss" source(none);
+@source "./**/*.templ";
