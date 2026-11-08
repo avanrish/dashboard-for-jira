@@ -1,9 +1,11 @@
 package jira
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"slices"
 	"strings"
 	"testing"
@@ -63,7 +65,7 @@ func TestBoardGroupsIssuesIntoEpicLanes(t *testing.T) {
 			t.Errorf("fields = %q, want %q", got, want)
 		}
 		// The backlog's status 10 is left out.
-		if got, want := r.URL.Query().Get("jql"), "(fixVersion is EMPTY) AND status in (1, 3, 5) AND ("+recentlyDone+")"; got != want {
+		if got, want := r.URL.Query().Get("jql"), fmt.Sprintf("(fixVersion is EMPTY) AND status in (1, 3, 5) AND (%s)", recentlyDone); got != want {
 			t.Errorf("jql = %q, want %q", got, want)
 		}
 		if r.URL.Query().Get("nextPageToken") == "page-2" {
@@ -112,9 +114,13 @@ func TestBoardGroupsIssuesIntoEpicLanes(t *testing.T) {
 	if colors := []string{got.Lanes[0].Epic.Color, got.Lanes[1].Epic.Color}; !slices.Equal(colors, []string{"purple", "teal"}) {
 		t.Errorf("epic colours = %q, want purple and teal", colors)
 	}
+	cardURL, err := url.JoinPath(server.URL, "browse", "DASH-3")
+	if err != nil {
+		t.Fatal(err)
+	}
 	wantCard := board.Issue{
 		Key: "DASH-3", Summary: "Fix login", Type: "Bug", Status: "Done", StatusCategory: board.Done,
-		Priority: "High", Assignee: "Ada Lovelace", Team: "Platform", Flagged: true, URL: server.URL + "/browse/DASH-3",
+		Priority: "High", Assignee: "Ada Lovelace", Team: "Platform", Flagged: true, URL: cardURL,
 	}
 	if card := got.Lanes[2].Cells[2][0]; card != wantCard {
 		t.Errorf("card = %+v, want %+v", card, wantCard)
@@ -144,7 +150,7 @@ func describeLane(lane board.Lane) string {
 		for _, issue := range issues {
 			keys = append(keys, issue.Key)
 		}
-		cells = append(cells, "["+strings.Join(keys, " ")+"]")
+		cells = append(cells, fmt.Sprintf("[%s]", strings.Join(keys, " ")))
 	}
-	return lane.Epic.Key + " " + lane.Epic.Summary + ": " + strings.Join(cells, " ")
+	return fmt.Sprintf("%s %s: %s", lane.Epic.Key, lane.Epic.Summary, strings.Join(cells, " "))
 }
