@@ -121,6 +121,22 @@ func TestBoardGroupsIssuesIntoEpicLanes(t *testing.T) {
 	}
 }
 
+// With an expired token, both settings requests fail the same way; the error should explain that once.
+func TestBoardErrorExplainsAFailureOnce(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusUnauthorized)
+	}))
+	defer server.Close()
+
+	_, err := BoardSource{Client: newTestClient(t, server.URL), BoardID: 7}.Board(t.Context())
+	if err == nil {
+		t.Fatal("got no error, want a 401")
+	}
+	if n := strings.Count(err.Error(), "API token may have expired"); n != 1 {
+		t.Errorf("error = %q, explains the expired token %d times, want once", err, n)
+	}
+}
+
 func describeLane(lane board.Lane) string {
 	var cells []string
 	for _, issues := range lane.Cells {

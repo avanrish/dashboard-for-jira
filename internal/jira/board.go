@@ -1,8 +1,8 @@
 package jira
 
 import (
+	"cmp"
 	"context"
-	"errors"
 	"fmt"
 	"maps"
 	"slices"
@@ -32,7 +32,8 @@ func (s BoardSource) Board(ctx context.Context) (board.Board, error) {
 	wait.Go(func() { configuration, configurationErr = s.Client.BoardConfiguration(ctx, s.BoardID) })
 	wait.Go(func() { customFields, customFieldsErr = s.Client.CustomFields(ctx) })
 	wait.Wait()
-	if err := errors.Join(configurationErr, customFieldsErr); err != nil {
+	// An expired token or a wrong site fails both requests the same way, so report only the first error.
+	if err := cmp.Or(configurationErr, customFieldsErr); err != nil {
 		return board.Board{}, fmt.Errorf("loading the settings of board %d: %w", s.BoardID, err)
 	}
 
