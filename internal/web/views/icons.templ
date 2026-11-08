@@ -41,6 +41,15 @@ templ priorityIcon(priority string) {
 	}
 }
 
+templ flagIcon() {
+	<span title="Flagged" role="img" aria-label="Flagged" class="shrink-0 text-flag">
+		<svg class="size-4" viewBox="0 0 16 16" aria-hidden="true">
+			<path d="M4 2.5v11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+			<path d="M4 3h7.5L9.75 5.75 11.5 8.5H4z" fill="currentColor"></path>
+		</svg>
+	</span>
+}
+
 // typeClass lives in this .templ file because Tailwind only scans .templ files for class names.
 func typeClass(issueType string) string {
 	switch issueType {

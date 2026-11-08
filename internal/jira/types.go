@@ -45,6 +45,8 @@ type IssueFields struct {
 		AvatarURLs  map[string]string `json:"avatarUrls"` // by size, such as 48x48
 	} `json:"assignee"`
 	Parent *Parent `json:"parent"`
+	// Flagged is a field the board endpoints add, true when someone flagged the issue as blocked.
+	Flagged bool `json:"flagged"`
 	// All holds every returned field undecoded, for custom fields whose IDs differ between sites, such as Team.
 	All map[string]json.RawMessage `json:"-"`
 }

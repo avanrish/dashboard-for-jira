@@ -13,7 +13,7 @@ import (
 )
 
 // boardFields lists the issue fields the board shows; requesting only these keeps responses small.
-var boardFields = []string{"summary", "status", "issuetype", "priority", "assignee", "parent"}
+var boardFields = []string{"summary", "status", "issuetype", "priority", "assignee", "parent", "flagged"}
 
 // recentlyDone hides finished issues not updated for 7 days, as the board in Jira does, which keeps long-lived boards short.
 const recentlyDone = "statusCategory != Done OR updated >= -7d"

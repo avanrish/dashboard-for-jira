@@ -30,6 +30,7 @@ type Issue struct {
 	Assignee       string // display name; empty when unassigned
 	AssigneeAvatar string // URL of the assignee's avatar picture from Jira
 	Team           string // empty when unset
+	Flagged        bool
 	URL            string
 }
 

@@ -30,7 +30,8 @@ const firstIssuePageJSON = `{"nextPageToken": "page-2", "issues": [
 	{"key": "DASH-2", "fields": {"summary": "Add SSO", "status": {"id": "1"}, "issuetype": {"name": "Story", "hierarchyLevel": 0},
 		"parent": {"id": "101", "key": "DASH-1", "fields": {"summary": "Auth revamp", "issuetype": {"name": "Epic", "hierarchyLevel": 1}}}}},
 	{"key": "DASH-3", "fields": {"summary": "Fix login", "status": {"id": "5", "name": "Done", "statusCategory": {"key": "done"}}, "issuetype": {"name": "Bug", "hierarchyLevel": 0},
-		"priority": {"name": "High"}, "assignee": {"displayName": "Ada Lovelace"}, "customfield_10001": {"id": "36885b3c", "name": "Platform"}}}
+		"priority": {"name": "High"}, "assignee": {"displayName": "Ada Lovelace"}, "customfield_10001": {"id": "36885b3c", "name": "Platform"},
+		"flagged": true}}
 ]}`
 
 // The last page holds a subtask of DASH-2, a story whose epic is not on the board, and an issue in a status without a column.
@@ -58,7 +59,7 @@ func TestBoardGroupsIssuesIntoEpicLanes(t *testing.T) {
 		if email, token, _ := r.BasicAuth(); email != "ada@example.com" || token != "test-token" {
 			t.Errorf("basic auth = %q, %q", email, token)
 		}
-		if got, want := r.URL.Query().Get("fields"), "summary,status,issuetype,priority,assignee,parent,customfield_10001"; got != want {
+		if got, want := r.URL.Query().Get("fields"), "summary,status,issuetype,priority,assignee,parent,flagged,customfield_10001"; got != want {
 			t.Errorf("fields = %q, want %q", got, want)
 		}
 		// The backlog's status 10 is left out.
@@ -113,7 +114,7 @@ func TestBoardGroupsIssuesIntoEpicLanes(t *testing.T) {
 	}
 	wantCard := board.Issue{
 		Key: "DASH-3", Summary: "Fix login", Type: "Bug", Status: "Done", StatusCategory: board.Done,
-		Priority: "High", Assignee: "Ada Lovelace", Team: "Platform", URL: server.URL + "/browse/DASH-3",
+		Priority: "High", Assignee: "Ada Lovelace", Team: "Platform", Flagged: true, URL: server.URL + "/browse/DASH-3",
 	}
 	if card := got.Lanes[2].Cells[2][0]; card != wantCard {
 		t.Errorf("card = %+v, want %+v", card, wantCard)

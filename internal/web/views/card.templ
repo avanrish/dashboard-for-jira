@@ -3,7 +3,7 @@ package views
 import "github.com/avanrish/dashboard-for-jira/internal/board"
 
 templ card(issue board.Issue) {
-	<a href={ templ.URL(issue.URL) } target="_blank" rel="noopener noreferrer" title={ issue.Summary } class="block rounded-md bg-card p-2 shadow-sm ring-1 ring-line hover:ring-accent focus-visible:outline-2 focus-visible:outline-accent">
+	<a href={ templ.URL(issue.URL) } target="_blank" rel="noopener noreferrer" title={ issue.Summary } class={ "block rounded-md p-2 shadow-sm ring-1 ring-line hover:ring-accent focus-visible:outline-2 focus-visible:outline-accent", cardBackground(issue.Flagged) }>
 		<p class="line-clamp-3 text-sm leading-snug">{ issue.Summary }</p>
 		<div class="mt-2 flex items-center gap-2 text-xs text-fg-muted">
 			<span class={ "max-w-full shrink-0 truncate rounded px-1.5 py-0.5 text-[11px] font-semibold uppercase", statusClass(issue.StatusCategory) }>{ issue.Status }</span>
@@ -14,6 +14,9 @@ templ card(issue board.Issue) {
 		<div class="mt-1.5 flex items-center gap-1.5 text-xs text-fg-muted">
 			@typeIcon(issue.Type)
 			<span class="font-mono whitespace-nowrap">{ issue.Key }</span>
+			if issue.Flagged {
+				@flagIcon()
+			}
 			<span class="ml-auto flex shrink-0 items-center gap-1.5">
 				@priorityIcon(issue.Priority)
 				@avatar(issue.Assignee, issue.AssigneeAvatar)
@@ -31,4 +34,11 @@ func statusClass(category board.StatusCategory) string {
 	default:
 		return "bg-chip text-fg"
 	}
+}
+
+func cardBackground(flagged bool) string {
+	if flagged {
+		return "bg-card-flagged"
+	}
+	return "bg-card"
 }

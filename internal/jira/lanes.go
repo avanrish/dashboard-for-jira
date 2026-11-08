@@ -126,6 +126,7 @@ func cardOf(issue Issue, teamField string, issueURL func(key string) string) boa
 		Summary: issue.Fields.Summary,
 		Type:    issue.Fields.IssueType.Name,
 		Status:  issue.Fields.Status.Name,
+		Flagged: issue.Fields.Flagged,
 		URL:     issueURL(issue.Key),
 	}
 	switch issue.Fields.Status.StatusCategory.Key {
