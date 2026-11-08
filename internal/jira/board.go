@@ -66,7 +66,15 @@ func (s BoardSource) Board(ctx context.Context) (board.Board, error) {
 		return board.Board{}, fmt.Errorf("loading the issues of board %d: %w", s.BoardID, err)
 	}
 
-	epics := epicsByIssue(issues)
+	var parents []Issue
+	if ids := missingParents(issues); len(ids) > 0 {
+		jql := fmt.Sprintf("id in (%s)", strings.Join(ids, ", "))
+		parents, err = s.Client.SearchIssues(ctx, jql, []string{"parent"})
+		if err != nil {
+			return board.Board{}, fmt.Errorf("loading the parents of subtasks on board %d: %w", s.BoardID, err)
+		}
+	}
+	epics := epicsByIssue(issues, parents)
 	var rankedEpics []Issue
 	if len(epics) > 0 {
 		ids := make(map[string]bool)

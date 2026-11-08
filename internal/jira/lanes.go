@@ -3,6 +3,7 @@ package jira
 import (
 	"cmp"
 	"encoding/json"
+	"maps"
 	"slices"
 	"strconv"
 	"strings"
@@ -19,10 +20,27 @@ var epicColors = []string{
 	"dark-purple", "orange", "blue", "teal", "gray", "dark-green", "dark-orange",
 }
 
-// epicsByIssue maps issue keys to their epics. A subtask's parent is a standard issue, so a subtask takes that issue's epic.
-func epicsByIssue(issues []Issue) map[string]*Parent {
-	epics := make(map[string]*Parent)
+// missingParents returns the IDs of subtasks' parents that are not among issues, such as stories in the backlog.
+// epicsByIssue needs them to find the subtasks' epics.
+func missingParents(issues []Issue) []string {
+	keys := make(map[string]bool)
 	for _, issue := range issues {
+		keys[issue.Key] = true
+	}
+	ids := make(map[string]bool)
+	for _, issue := range issues {
+		if parent := issue.Fields.Parent; parent != nil && parent.Fields.IssueType.HierarchyLevel < epicLevel && !keys[parent.Key] {
+			ids[parent.ID] = true
+		}
+	}
+	return slices.Sorted(maps.Keys(ids))
+}
+
+// epicsByIssue maps issue keys to their epics. A subtask's parent is a standard issue, so a subtask takes that issue's epic.
+// parents holds the parents that missingParents reports, with their parent field.
+func epicsByIssue(issues, parents []Issue) map[string]*Parent {
+	epics := make(map[string]*Parent)
+	for _, issue := range slices.Concat(issues, parents) {
 		if parent := issue.Fields.Parent; parent != nil && parent.Fields.IssueType.HierarchyLevel == epicLevel {
 			epics[issue.Key] = parent
 		}

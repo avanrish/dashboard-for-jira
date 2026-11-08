@@ -36,13 +36,16 @@ const firstIssuePageJSON = `{"nextPageToken": "page-2", "issues": [
 		"flagged": true}}
 ]}`
 
-// The last page holds a subtask of DASH-2, a story whose epic is not on the board, and an issue in a status without a column.
+// The last page holds a subtask of DASH-2, a story whose epic is not on the board, an issue in a status without a column,
+// and a subtask of DASH-8, a story in that epic which waits in the backlog.
 const lastIssuePageJSON = `{"issues": [
 	{"key": "DASH-4", "fields": {"summary": "Configure the identity provider", "status": {"id": "3"}, "issuetype": {"name": "Subtask", "hierarchyLevel": -1},
 		"parent": {"id": "102", "key": "DASH-2", "fields": {"summary": "Add SSO", "issuetype": {"name": "Story", "hierarchyLevel": 0}}}}},
 	{"key": "DASH-5", "fields": {"summary": "Cache dependencies", "status": {"id": "1"}, "issuetype": {"name": "Task", "hierarchyLevel": 0},
 		"parent": {"id": "109", "key": "DASH-9", "fields": {"summary": "Speed up CI", "issuetype": {"name": "Epic", "hierarchyLevel": 1}}}}},
-	{"key": "DASH-6", "fields": {"summary": "Unmapped status", "status": {"id": "99"}, "issuetype": {"name": "Task", "hierarchyLevel": 0}}}
+	{"key": "DASH-6", "fields": {"summary": "Unmapped status", "status": {"id": "99"}, "issuetype": {"name": "Task", "hierarchyLevel": 0}}},
+	{"key": "DASH-7", "fields": {"summary": "Cache Go modules", "status": {"id": "3"}, "issuetype": {"name": "Subtask", "hierarchyLevel": -1},
+		"parent": {"id": "108", "key": "DASH-8", "fields": {"summary": "Speed up builds", "issuetype": {"name": "Story", "hierarchyLevel": 0}}}}}
 ]}`
 
 func TestBoardGroupsIssuesIntoEpicLanes(t *testing.T) {
@@ -75,16 +78,27 @@ func TestBoardGroupsIssuesIntoEpicLanes(t *testing.T) {
 		}
 	})
 	mux.HandleFunc("GET /rest/api/3/search/jql", func(w http.ResponseWriter, r *http.Request) {
-		if got, want := r.URL.Query().Get("jql"), "id in (101, 109) ORDER BY Rank ASC"; got != want {
-			t.Errorf("jql = %q, want %q", got, want)
+		switch jql, fields := r.URL.Query().Get("jql"), r.URL.Query().Get("fields"); jql {
+		case "id in (108)": // DASH-7's parent, for its epic
+			if fields != "parent" {
+				t.Errorf("fields = %q, want parent", fields)
+			}
+			_, _ = io.WriteString(w, `{"issues": [
+				{"id": "108", "key": "DASH-8", "fields": {
+					"parent": {"id": "109", "key": "DASH-9", "fields": {"summary": "Speed up CI", "issuetype": {"name": "Epic", "hierarchyLevel": 1}}}}}
+			]}`)
+		case "id in (101, 109) ORDER BY Rank ASC":
+			if fields != "customfield_10002" {
+				t.Errorf("fields = %q, want customfield_10002", fields)
+			}
+			_, _ = io.WriteString(w, `{"issues": [
+				{"id": "109", "fields": {"customfield_10002": "purple"}},
+				{"id": "101", "fields": {"customfield_10002": "ghx-label-11"}}
+			]}`)
+		default:
+			t.Errorf("unexpected jql %q", jql)
+			http.Error(w, "unexpected jql", http.StatusBadRequest)
 		}
-		if got, want := r.URL.Query().Get("fields"), "customfield_10002"; got != want {
-			t.Errorf("fields = %q, want %q", got, want)
-		}
-		_, _ = io.WriteString(w, `{"issues": [
-			{"id": "109", "fields": {"customfield_10002": "purple"}},
-			{"id": "101", "fields": {"customfield_10002": "ghx-label-11"}}
-		]}`)
 	})
 	server := httptest.NewServer(mux)
 	defer server.Close()
@@ -104,7 +118,7 @@ func TestBoardGroupsIssuesIntoEpicLanes(t *testing.T) {
 	}
 	// Lanes follow epic rank, and the empty epic DASH-10 gets none.
 	wantLanes := []string{
-		"DASH-9 Speed up CI: [DASH-5] [] []",
+		"DASH-9 Speed up CI: [DASH-5] [DASH-7] []",
 		"DASH-1 Auth revamp: [DASH-2] [DASH-4] []",
 		" : [] [] [DASH-3]",
 	}
