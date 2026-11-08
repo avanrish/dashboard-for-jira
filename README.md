@@ -4,10 +4,21 @@
 A web dashboard for Jira.
 <!-- LINT.ThenChange(//AGENTS.md:project_header) -->
 
+## Install
+
+With [Go](https://go.dev/dl/) installed, run:
+
+```sh
+go install github.com/avanrish/dashboard-for-jira@latest
+```
+
+This builds `dashboard-for-jira` into `$(go env GOPATH)/bin`, usually `~/go/bin`; add that directory to your `PATH` to run it from anywhere.
+Replace `@latest` with a release tag, such as `@v0.1.0`, to install that version, and run the command again to update.
+
 ## Project structure
 
 <!-- LINT.IfChange(project_structure) -->
-- `cmd/<name>/` — one directory per executable; keep `main.go` thin and call into `internal/`
+- `main.go` — the executable, at the repository root so `go install github.com/avanrish/dashboard-for-jira@latest` installs it; keep it thin and call into `internal/`
 - `internal/` — application code, not importable by other modules
 - `docs/decisions/` — architecture decision records explaining why the project is built the way it is
 - Tests live next to the code they test as `*_test.go` files, with fixtures in a package-local `testdata/`

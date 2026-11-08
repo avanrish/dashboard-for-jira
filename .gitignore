@@ -1,7 +1,7 @@
 # Editor settings
 .idea/
 
-# Build output (e.g. go build -o bin/ ./cmd/...)
+# Build output (e.g. go build -o bin/ .)
 /bin/
 *.exe
 *.test

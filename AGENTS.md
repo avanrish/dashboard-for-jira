@@ -7,7 +7,7 @@ A web dashboard for Jira.
 ## Project structure
 
 <!-- LINT.IfChange(project_structure) -->
-- `cmd/<name>/` — one directory per executable; keep `main.go` thin and call into `internal/`
+- `main.go` — the executable, at the repository root so `go install github.com/avanrish/dashboard-for-jira@latest` installs it; keep it thin and call into `internal/`
 - `internal/` — application code, not importable by other modules
 - `docs/decisions/` — architecture decision records explaining why the project is built the way it is
 - Tests live next to the code they test as `*_test.go` files, with fixtures in a package-local `testdata/`
@@ -71,3 +71,4 @@ If a `.jj` directory exists in the repository root, default to using `jj` (Jujut
 - Every commit on `main` must pass CI. Pull requests land as a squash or a merge commit, so a PR's own commits need not each pass.
 - Keep commits atomic: one responsibility each, with code, tests, and docs updated together. Put file renames in their own commit.
 - Squash pull requests by default. Use a merge commit only when the history is worth keeping, such as what was tried or how a bug was tracked down.
+- A release is a semantic version tag on `main`, such as `v0.1.0`, which `go install` resolves. Never move or delete a pushed tag: the Go module proxy keeps the first version it saw.

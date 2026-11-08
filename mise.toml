@@ -57,7 +57,7 @@ hide = true
 # exec replaces the shell, so templ stops the server itself when it restarts it.
 run = '''go tool templ generate --watch \
   --watch-pattern='(.+\.go$)|(.+\.templ$)|(.+_templ\.txt$)|(static/app\.css$)' \
-  --cmd='go build -o bin/dashboard-for-jira ./cmd/dashboard-for-jira && exec bin/dashboard-for-jira' \
+  --cmd='go build -o bin/dashboard-for-jira . && exec bin/dashboard-for-jira' \
   --proxy=http://127.0.0.1:8080'''
 
 [tasks."dev:css"]
