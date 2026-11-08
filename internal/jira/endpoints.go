@@ -44,43 +44,31 @@ func (c *Client) CustomFields(ctx context.Context) (CustomFields, error) {
 // BoardIssues returns the board's issues that match jql, in rank order, following every page.
 // It uses the Jira Software endpoint because the Agile API's version, paged by offset, is deprecated.
 func (c *Client) BoardIssues(ctx context.Context, boardID int, jql string, fields []string) ([]Issue, error) {
-	query := url.Values{
-		"jql":    {jql},
-		"fields": {strings.Join(fields, ",")},
-		// The most Jira allows; it sends smaller pages when it needs to.
-		"maxResults": {"5000"},
-	}
-	var issues []Issue
-	for {
-		var page struct {
-			Issues        []Issue `json:"issues"`
-			NextPageToken string  `json:"nextPageToken"`
-		}
-		if err := c.get(ctx, fmt.Sprintf("/rest/software/1.0/board/%d/issue", boardID), query, &page); err != nil {
-			return nil, err
-		}
-		issues = append(issues, page.Issues...)
-		if page.NextPageToken == "" {
-			return issues, nil
-		}
-		query.Set("nextPageToken", page.NextPageToken)
-	}
+	query := url.Values{"jql": {jql}, "fields": {strings.Join(fields, ",")}}
+	return c.allIssues(ctx, fmt.Sprintf("/rest/software/1.0/board/%d/issue", boardID), query)
 }
 
 // SearchIssues returns the issues that match jql, in the query's order, following every page.
 // Without fields, Jira returns only each issue's ID.
 func (c *Client) SearchIssues(ctx context.Context, jql string, fields []string) ([]Issue, error) {
-	query := url.Values{"jql": {jql}, "maxResults": {"5000"}}
+	query := url.Values{"jql": {jql}}
 	if len(fields) > 0 {
 		query.Set("fields", strings.Join(fields, ","))
 	}
+	return c.allIssues(ctx, "/rest/api/3/search/jql", query)
+}
+
+// allIssues returns the issues from every page of an endpoint that pages them with nextPageToken.
+func (c *Client) allIssues(ctx context.Context, path string, query url.Values) ([]Issue, error) {
+	// The most Jira allows; it sends smaller pages when it needs to.
+	query.Set("maxResults", "5000")
 	var issues []Issue
 	for {
 		var page struct {
 			Issues        []Issue `json:"issues"`
 			NextPageToken string  `json:"nextPageToken"`
 		}
-		if err := c.get(ctx, "/rest/api/3/search/jql", query, &page); err != nil {
+		if err := c.get(ctx, path, query, &page); err != nil {
 			return nil, err
 		}
 		issues = append(issues, page.Issues...)
