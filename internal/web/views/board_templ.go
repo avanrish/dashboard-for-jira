@@ -318,6 +318,7 @@ func epicLane(lane board.Lane) templ.Component {
 // epicClass fills an epic's square with its colour from Jira; epics without one use the epic role.
 func epicClass(color string) string {
 	switch color {
+	// LINT.IfChange(epic_colors)
 	case "dark-gray":
 		return "bg-epic-dark-gray"
 	case "dark-yellow":
@@ -346,6 +347,10 @@ func epicClass(color string) string {
 		return "bg-epic-dark-green"
 	case "dark-orange":
 		return "bg-epic-dark-orange"
+	// LINT.ThenChange(
+	//     //internal/jira/lanes.go:epic_colors,
+	//     //internal/web/tailwind.css:epic_colors,
+	// )
 	default:
 		return "bg-epic"
 	}

@@ -16,8 +16,13 @@ const epicLevel = 1
 
 // epicColors lists Jira's epic colours in the order of their codes, ghx-label-1 to ghx-label-14.
 var epicColors = []string{
+	// LINT.IfChange(epic_colors)
 	"dark-gray", "dark-yellow", "yellow", "dark-blue", "dark-teal", "green", "purple",
 	"dark-purple", "orange", "blue", "teal", "gray", "dark-green", "dark-orange",
+	// LINT.ThenChange(
+	//     //internal/web/views/board.templ:epic_colors,
+	//     //internal/web/tailwind.css:epic_colors,
+	// )
 }
 
 // missingParents returns the IDs of subtasks' parents that are not among issues, such as stories in the backlog.

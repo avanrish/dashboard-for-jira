@@ -43,6 +43,7 @@
   --color-done-soft: oklch(96.2% 0.044 156.743); /* green-100 */
 
   /* Jira's epic colours, the same in both themes, as Atlassian documents them for the codes ghx-label-1 to 14. */
+  /* LINT.IfChange(epic_colors) */
   --color-epic-dark-gray: #243859;
   --color-epic-dark-yellow: #fa9920;
   --color-epic-yellow: #fac304;
@@ -57,6 +58,7 @@
   --color-epic-gray: #6b778c;
   --color-epic-dark-green: #128759;
   --color-epic-dark-orange: #dd350d;
+  /* LINT.ThenChange(//internal/jira/lanes.go:epic_colors, //internal/web/views/board.templ:epic_colors) */
 }
 
 /* Not `@theme inline`: that copies the light values into the classes, and this block would have no effect. */
