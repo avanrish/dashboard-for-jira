@@ -27,11 +27,22 @@ Run `mise install` to provision Go and the development tools pinned in `mise.tom
 ## Web UI
 
 <!-- LINT.IfChange(web_ui) -->
-The UI is rendered on the server from templ templates in `internal/web/`, styled with Tailwind classes compiled into `internal/web/static/app.css`.
+The server in `internal/web/` renders pages from templ components in `internal/web/views/`, each reusable component in its own file.
+They are styled with Tailwind classes, compiled from `internal/web/tailwind.css` into `internal/web/static/app.css`.
+Use only the colour roles defined in `internal/web/tailwind.css`, such as `bg-card`, `text-fg-muted`, and `border-line`.
+Tailwind's own palette is removed, so classes like `text-slate-500` produce nothing.
+Each role has a light and a dark value, so templates need no `dark:` classes; when no role fits, add one with both.
 
 - `mise run dev` — run the server with live reload at http://127.0.0.1:7331
 - `mise run generate` — regenerate templ code and the Tailwind stylesheet. Run after editing `.templ` files or Tailwind classes, and commit the output; CI fails if it is stale.
 <!-- LINT.ThenChange(//AGENTS.md:web_ui) -->
+
+## Configuration
+
+<!-- LINT.IfChange(configuration) -->
+The server reads its settings from environment variables and from a `.env` file in the current directory; variables set in the environment take precedence.
+Copy `.env.example` to `.env` and fill in your Jira site, email, API token, and board ID before running the server.
+<!-- LINT.ThenChange(//AGENTS.md:configuration) -->
 
 ## License
 

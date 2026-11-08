@@ -1,0 +1,17 @@
+package views
+
+// layout is the HTML document every page shares.
+templ layout(title string) {
+	<!DOCTYPE html>
+	<html lang="en" class="h-full">
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<title>{ title }</title>
+			<link rel="stylesheet" href="/static/app.css"/>
+		</head>
+		<body class="flex h-full flex-col bg-page text-fg antialiased">
+			{ children... }
+		</body>
+	</html>
+}

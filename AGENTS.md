@@ -27,7 +27,11 @@ Run `mise install` to provision Go and the development tools pinned in `mise.tom
 ## Web UI
 
 <!-- LINT.IfChange(web_ui) -->
-The UI is rendered on the server from templ templates in `internal/web/`, styled with Tailwind classes compiled into `internal/web/static/app.css`.
+The server in `internal/web/` renders pages from templ components in `internal/web/views/`, each reusable component in its own file.
+They are styled with Tailwind classes, compiled from `internal/web/tailwind.css` into `internal/web/static/app.css`.
+Use only the colour roles defined in `internal/web/tailwind.css`, such as `bg-card`, `text-fg-muted`, and `border-line`.
+Tailwind's own palette is removed, so classes like `text-slate-500` produce nothing.
+Each role has a light and a dark value, so templates need no `dark:` classes; when no role fits, add one with both.
 
 - `mise run dev` — run the server with live reload at http://127.0.0.1:7331
 - `mise run generate` — regenerate templ code and the Tailwind stylesheet. Run after editing `.templ` files or Tailwind classes, and commit the output; CI fails if it is stale.
@@ -36,6 +40,13 @@ The UI is rendered on the server from templ templates in `internal/web/`, styled
 CI also runs checks that `mise run lint` does not: `typos`, `ifttt-lint`, and `gitleaks`. Their tools are pinned in `mise.ci.toml`; install them with `MISE_ENV=ci mise install`, then run `typos` and `ifttt-lint --diff 'main..@'` (`main...HEAD` with git) before pushing.
 CI runs tests on Linux.
 
+## Configuration
+
+<!-- LINT.IfChange(configuration) -->
+The server reads its settings from environment variables and from a `.env` file in the current directory; variables set in the environment take precedence.
+Copy `.env.example` to `.env` and fill in your Jira site, email, API token, and board ID before running the server.
+<!-- LINT.ThenChange(//README.md:configuration) -->
+
 ## Conventions
 
 <!-- LINT.IfChange(commit_subject) -->
@@ -43,6 +54,9 @@ CI runs tests on Linux.
 <!-- LINT.ThenChange(//committed.toml:commit_subject) -->
 - Use narrow `LINT.IfChange` / `LINT.ThenChange` directives when duplicated cross-file content must stay in sync and cannot be eliminated.
   Write targets as repository-root paths starting with `//` (e.g. `//mise.toml:go_version`); ifttt-lint enforces them in CI.
+- Prefer building strings from parts with `fmt.Sprintf`, and errors with `fmt.Errorf`, over joining them with `+`; this includes expressions in `.templ` files.
+  Appending a piece to a string with `+=` is fine.
+  Prefer building URLs with `net/url` (`url.URL`, `JoinPath`, `url.Values`).
 
 ## Decisions
 

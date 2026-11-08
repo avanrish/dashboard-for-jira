@@ -11,3 +11,6 @@
 
 # Text files templ writes in watch mode (mise run dev)
 *_templ.txt
+
+# Local settings, including the Jira API token (see .env.example)
+/.env

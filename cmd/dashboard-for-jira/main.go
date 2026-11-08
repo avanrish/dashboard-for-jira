@@ -3,18 +3,19 @@ package main
 import (
 	"context"
 	"errors"
-	"flag"
 	"fmt"
 	"log/slog"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"strconv"
 	"syscall"
 	"time"
 
-	"github.com/avanrish/dashboard-for-jira/internal/board"
+	"github.com/avanrish/dashboard-for-jira/internal/config"
+	"github.com/avanrish/dashboard-for-jira/internal/jira"
 	"github.com/avanrish/dashboard-for-jira/internal/web"
 )
 
@@ -26,8 +27,10 @@ func main() {
 }
 
 func run() error {
-	port := flag.Int("port", 8080, "port to listen on; the server only listens on 127.0.0.1")
-	flag.Parse()
+	settings, err := config.Load()
+	if err != nil {
+		return err
+	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -35,18 +38,22 @@ func run() error {
 	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
 
 	var listenConfig net.ListenConfig
-	listener, err := listenConfig.Listen(ctx, "tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(*port)))
+	listener, err := listenConfig.Listen(ctx, "tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(settings.Port)))
 	if err != nil {
 		return err
 	}
 
+	boards := jira.BoardSource{
+		Client:  jira.NewClient(&url.URL{Scheme: "https", Host: settings.JiraSite}, settings.JiraEmail, settings.JiraAPIToken),
+		BoardID: settings.JiraBoardID,
+	}
 	httpServer := &http.Server{
-		Handler:           web.NewHandler(board.MockSource{}, logger),
+		Handler:           web.NewHandler(boards, logger),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 	serveErr := make(chan error, 1)
 	go func() { serveErr <- httpServer.Serve(listener) }()
-	logger.Info("serving the dashboard", "url", "http://"+listener.Addr().String())
+	logger.Info("serving the dashboard", "url", (&url.URL{Scheme: "http", Host: listener.Addr().String()}).String())
 
 	select {
 	case err := <-serveErr:

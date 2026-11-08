@@ -1,3 +1,95 @@
 /* Tailwind entry point. `mise run generate` compiles it into static/app.css. */
 @import "tailwindcss" source(none);
 @source "./**/*.templ";
+
+/*
+ * Colour roles, the only colours templates can use: Tailwind's palette is removed, so a class like
+ * `text-slate-500` produces nothing. Dark mode redefines every role below, so templates need no `dark:` classes.
+ * Values are taken from Tailwind's palette, named in the comments.
+ */
+@theme {
+  --color-*: initial;
+
+  --color-page: oklch(96.8% 0.007 247.896); /* slate-100, page background */
+  --color-surface: #fff; /* header bar */
+  --color-column: oklch(92.9% 0.013 255.508); /* slate-200, column background */
+  --color-card: #fff;
+  --color-card-flagged: oklch(98.7% 0.022 95.277); /* amber-50, cards of flagged issues */
+  --color-line: oklch(92.9% 0.013 255.508); /* slate-200, borders and card outlines */
+  --color-chip: oklch(86.9% 0.022 252.894); /* slate-300, neutral pills such as counts */
+  --color-fg: oklch(20.8% 0.042 265.755); /* slate-900, text */
+  --color-fg-muted: oklch(55.4% 0.046 257.417); /* slate-500, secondary text */
+  --color-accent: oklch(51.1% 0.262 276.966); /* indigo-600 */
+  --color-on-accent: #fff; /* text on accent */
+
+  /* Issue type icons: a glyph in on-accent on these backgrounds. */
+  --color-story: oklch(59.6% 0.145 163.225); /* emerald-600 */
+  --color-bug: oklch(57.7% 0.245 27.325); /* red-600 */
+  --color-task: oklch(58.8% 0.158 241.966); /* sky-600 */
+
+  --color-flag: oklch(57.7% 0.245 27.325); /* red-600, the flag on flagged issues */
+
+  /* Priority icons. */
+  --color-priority-high: oklch(57.7% 0.245 27.325); /* red-600 */
+  --color-priority-medium: oklch(76.9% 0.188 70.08); /* amber-500 */
+  --color-priority-low: oklch(54.6% 0.245 262.881); /* blue-600 */
+
+  --color-epic: oklch(43.2% 0.232 292.759); /* violet-800, epics without a colour */
+
+  /* Status badges: text and a soft background for each category. */
+  --color-progress: oklch(42.4% 0.199 265.638); /* blue-800 */
+  --color-progress-soft: oklch(93.2% 0.032 255.585); /* blue-100 */
+  --color-done: oklch(44.8% 0.119 151.328); /* green-800 */
+  --color-done-soft: oklch(96.2% 0.044 156.743); /* green-100 */
+
+  /* Jira's epic colours, the same in both themes, as Atlassian documents them for the codes ghx-label-1 to 14. */
+  /* LINT.IfChange(epic_colors) */
+  --color-epic-dark-gray: #243859;
+  --color-epic-dark-yellow: #fa9920;
+  --color-epic-yellow: #fac304;
+  --color-epic-dark-blue: #2a53cc;
+  --color-epic-dark-teal: #2aa3bf;
+  --color-epic-green: #58d8a4;
+  --color-epic-purple: #8677d9;
+  --color-epic-dark-purple: #5244aa;
+  --color-epic-orange: #fa7353;
+  --color-epic-blue: #3884ff;
+  --color-epic-teal: #34c7e6;
+  --color-epic-gray: #6b778c;
+  --color-epic-dark-green: #128759;
+  --color-epic-dark-orange: #dd350d;
+  /* LINT.ThenChange(//internal/jira/lanes.go:epic_colors, //internal/web/views/board.templ:epic_colors) */
+}
+
+/* Not `@theme inline`: that copies the light values into the classes, and this block would have no effect. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-page: oklch(12.9% 0.042 264.695); /* slate-950 */
+    --color-surface: oklch(20.8% 0.042 265.755); /* slate-900 */
+    --color-column: oklch(20.8% 0.042 265.755); /* slate-900 */
+    --color-card: oklch(27.9% 0.041 260.031); /* slate-800 */
+    --color-card-flagged: oklch(27.9% 0.077 45.635); /* amber-950 */
+    --color-line: oklch(37.2% 0.044 257.287); /* slate-700 */
+    --color-chip: oklch(37.2% 0.044 257.287); /* slate-700, lighter than cards */
+    --color-fg: oklch(96.8% 0.007 247.896); /* slate-100 */
+    --color-fg-muted: oklch(70.4% 0.04 256.788); /* slate-400 */
+    --color-accent: oklch(58.5% 0.233 277.117); /* indigo-500 */
+    --color-on-accent: #fff;
+
+    --color-story: oklch(69.6% 0.17 162.48); /* emerald-500 */
+    --color-bug: oklch(63.7% 0.237 25.331); /* red-500 */
+    --color-task: oklch(68.5% 0.169 237.323); /* sky-500 */
+
+    --color-flag: oklch(70.4% 0.191 22.216); /* red-400 */
+
+    --color-priority-high: oklch(70.4% 0.191 22.216); /* red-400 */
+    --color-priority-medium: oklch(82.8% 0.189 84.429); /* amber-400 */
+    --color-priority-low: oklch(70.7% 0.165 254.624); /* blue-400 */
+
+    --color-epic: oklch(81.1% 0.111 293.571); /* violet-300 */
+    --color-progress: oklch(80.9% 0.105 251.813); /* blue-300 */
+    --color-progress-soft: oklch(28.2% 0.091 267.935); /* blue-950 */
+    --color-done: oklch(87.1% 0.15 154.449); /* green-300 */
+    --color-done-soft: oklch(26.6% 0.065 152.934); /* green-950 */
+  }
+}

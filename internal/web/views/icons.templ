@@ -1,0 +1,82 @@
+package views
+
+// typeIcon draws common issue types as a glyph on a coloured square; other types show their initials.
+templ typeIcon(issueType string) {
+	<span title={ issueType } role="img" aria-label={ issueType } class={ "flex size-4 shrink-0 items-center justify-center rounded-[3px]", typeClass(issueType) }>
+		switch issueType {
+			case "Story":
+				<svg class="size-3" viewBox="0 0 12 12" aria-hidden="true">
+					<path d="M3.5 2h5v8.5L6 8.75 3.5 10.5z" fill="currentColor"></path>
+				</svg>
+			case "Bug":
+				<svg class="size-3" viewBox="0 0 12 12" aria-hidden="true">
+					<circle cx="6" cy="6" r="2.75" fill="currentColor"></circle>
+				</svg>
+			case "Task":
+				<svg class="size-3" viewBox="0 0 12 12" aria-hidden="true">
+					<path d="M3 6.25 5.25 8.5 9 4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"></path>
+				</svg>
+			case "Subtask", "Sub-task":
+				<svg class="size-3" viewBox="0 0 12 12" aria-hidden="true">
+					<rect x="2.5" y="2.5" width="4.5" height="4.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.25"></rect>
+					<rect x="5" y="5" width="4.5" height="4.5" rx="1" fill="currentColor"></rect>
+				</svg>
+			default:
+				<span class="text-[8px] leading-none font-bold">{ initials(issueType) }</span>
+		}
+	</span>
+}
+
+// priorityIcon draws the usual Jira priorities as arrows; other priority names show as text.
+templ priorityIcon(priority string) {
+	{{ path, colorClass := priorityShape(priority) }}
+	if path != "" {
+		<span title={ priority } role="img" aria-label={ priority } class={ "shrink-0", colorClass }>
+			<svg class="size-4" viewBox="0 0 16 16" aria-hidden="true">
+				<path d={ path } fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+			</svg>
+		</span>
+	} else if priority != "" {
+		<span title="Priority">{ priority }</span>
+	}
+}
+
+templ flagIcon() {
+	<span title="Flagged" role="img" aria-label="Flagged" class="shrink-0 text-flag">
+		<svg class="size-4" viewBox="0 0 16 16" aria-hidden="true">
+			<path d="M4 2.5v11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+			<path d="M4 3h7.5L9.75 5.75 11.5 8.5H4z" fill="currentColor"></path>
+		</svg>
+	</span>
+}
+
+// typeClass lives in this .templ file because Tailwind only scans .templ files for class names.
+func typeClass(issueType string) string {
+	switch issueType {
+	case "Story":
+		return "bg-story text-on-accent"
+	case "Bug":
+		return "bg-bug text-on-accent"
+	case "Task", "Subtask", "Sub-task":
+		return "bg-task text-on-accent"
+	default:
+		return "bg-chip text-fg"
+	}
+}
+
+// priorityShape returns an arrow path and colour for the usual Jira priority names, and nothing for others.
+func priorityShape(priority string) (path, colorClass string) {
+	switch priority {
+	case "Highest", "Blocker", "Critical":
+		return "M4 8l4-4 4 4M4 12l4-4 4 4", "text-priority-high"
+	case "High", "Major":
+		return "M4 10l4-4 4 4", "text-priority-high"
+	case "Medium":
+		return "M4 6h8M4 10h8", "text-priority-medium"
+	case "Low", "Minor":
+		return "M4 6l4 4 4-4", "text-priority-low"
+	case "Lowest", "Trivial":
+		return "M4 4l4 4 4-4M4 8l4 4 4-4", "text-priority-low"
+	}
+	return "", ""
+}
