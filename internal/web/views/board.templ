@@ -51,7 +51,7 @@ templ epicLane(lane board.Lane) {
 				<span class="font-medium text-fg-muted">Issues without epic</span>
 			} else {
 				<span class={ "size-3.5 shrink-0 rounded-[3px]", epicClass(lane.Epic.Color) }></span>
-				<a href={ templ.URL(lane.Epic.URL) } class="font-mono text-xs text-fg-muted hover:underline">{ lane.Epic.Key }</a>
+				<a href={ templ.URL(lane.Epic.URL) } target="_blank" rel="noopener noreferrer" class="font-mono text-xs text-fg-muted hover:underline">{ lane.Epic.Key }</a>
 				<span class="font-medium">{ lane.Epic.Summary }</span>
 			}
 			<span class="text-fg-muted">{ issueCount(lane.IssueCount()) }</span>
