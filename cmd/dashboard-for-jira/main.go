@@ -53,7 +53,7 @@ func run() error {
 	}
 	serveErr := make(chan error, 1)
 	go func() { serveErr <- httpServer.Serve(listener) }()
-	logger.Info("serving the dashboard", "url", "http://"+listener.Addr().String())
+	logger.Info("serving the dashboard", "url", (&url.URL{Scheme: "http", Host: listener.Addr().String()}).String())
 
 	select {
 	case err := <-serveErr:

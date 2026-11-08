@@ -355,7 +355,7 @@ func issueCount(count int) string {
 	if count == 1 {
 		return "1 issue"
 	}
-	return strconv.Itoa(count) + " issues"
+	return fmt.Sprintf("%d issues", count)
 }
 
 var _ = templruntime.GeneratedTemplate

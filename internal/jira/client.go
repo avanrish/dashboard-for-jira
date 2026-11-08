@@ -52,7 +52,7 @@ type APIError struct {
 func (e *APIError) Error() string {
 	message := fmt.Sprintf("Jira responded %d %s", e.StatusCode, http.StatusText(e.StatusCode))
 	if len(e.Messages) > 0 {
-		message = fmt.Sprintf("%s: %s", message, strings.Join(e.Messages, "; "))
+		message += fmt.Sprintf(": %s", strings.Join(e.Messages, "; "))
 	}
 	if e.StatusCode == http.StatusUnauthorized {
 		message += ". The API token may have expired: create a new one at https://id.atlassian.com/manage-profile/security/api-tokens and put it in .env."
@@ -109,7 +109,7 @@ func newAPIError(response *http.Response) *APIError {
 	if json.NewDecoder(io.LimitReader(response.Body, 1<<16)).Decode(&body) == nil {
 		apiErr.Messages = body.ErrorMessages
 		for _, field := range slices.Sorted(maps.Keys(body.Errors)) {
-			apiErr.Messages = append(apiErr.Messages, field+": "+body.Errors[field])
+			apiErr.Messages = append(apiErr.Messages, fmt.Sprintf("%s: %s", field, body.Errors[field]))
 		}
 	}
 	if response.StatusCode == http.StatusTooManyRequests {
