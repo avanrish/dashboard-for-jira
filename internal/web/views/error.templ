@@ -1,0 +1,11 @@
+package views
+
+// ErrorPage explains why the board could not be shown.
+templ ErrorPage(message string) {
+	@layout("Error · Dashboard for Jira") {
+		<main class="m-auto max-w-xl p-6">
+			<h1 class="text-lg font-semibold">Could not load the board</h1>
+			<p class="mt-2 text-sm text-fg-muted">{ message }</p>
+		</main>
+	}
+}

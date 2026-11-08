@@ -1,13 +1,23 @@
-package web
+package views
 
 import (
+	"fmt"
 	"strconv"
-	"strings"
-	"unicode"
-	"unicode/utf8"
 
 	"github.com/avanrish/dashboard-for-jira/internal/board"
 )
+
+// BoardPage shows a board with its columns and epic lanes.
+templ BoardPage(boardData board.Board) {
+	@layout(fmt.Sprintf("%s · Dashboard for Jira", boardData.Name)) {
+		<header class="flex items-center gap-4 border-b border-line bg-surface px-6 py-3">
+			<h1 class="text-lg font-semibold">{ boardData.Name }</h1>
+		</header>
+		<main class="min-h-0 flex-1 overflow-auto">
+			@boardView(boardData)
+		</main>
+	}
+}
 
 templ boardView(boardData board.Board) {
 	<div class="w-max min-w-full px-6 pb-6">
@@ -60,112 +70,6 @@ templ epicLane(lane board.Lane) {
 	</details>
 }
 
-templ card(issue board.Issue) {
-	<a href={ templ.URL(issue.URL) } title={ issue.Summary } class="block rounded-md bg-card p-2 shadow-sm ring-1 ring-line hover:ring-accent focus-visible:outline-2 focus-visible:outline-accent">
-		<p class="line-clamp-3 text-sm leading-snug">{ issue.Summary }</p>
-		<div class="mt-2 flex items-center gap-2 text-xs text-fg-muted">
-			<span class={ "max-w-full shrink-0 truncate rounded px-1.5 py-0.5 text-[11px] font-semibold uppercase", statusClass(issue.StatusCategory) }>{ issue.Status }</span>
-			if issue.Team != "" {
-				<span title="Team" class="truncate">{ issue.Team }</span>
-			}
-		</div>
-		<div class="mt-1.5 flex items-center gap-1.5 text-xs text-fg-muted">
-			@typeIcon(issue.Type)
-			<span class="font-mono whitespace-nowrap">{ issue.Key }</span>
-			<span class="ml-auto flex shrink-0 items-center gap-1.5">
-				@priorityIcon(issue.Priority)
-				@avatar(issue.Assignee, issue.AssigneeAvatar)
-			</span>
-		</div>
-	</a>
-}
-
-// typeIcon draws common issue types as a glyph on a coloured square; other types show their initials.
-templ typeIcon(issueType string) {
-	<span title={ issueType } role="img" aria-label={ issueType } class={ "flex size-4 shrink-0 items-center justify-center rounded-[3px]", typeClass(issueType) }>
-		switch issueType {
-			case "Story":
-				<svg class="size-3" viewBox="0 0 12 12" aria-hidden="true">
-					<path d="M3.5 2h5v8.5L6 8.75 3.5 10.5z" fill="currentColor"></path>
-				</svg>
-			case "Bug":
-				<svg class="size-3" viewBox="0 0 12 12" aria-hidden="true">
-					<circle cx="6" cy="6" r="2.75" fill="currentColor"></circle>
-				</svg>
-			case "Task":
-				<svg class="size-3" viewBox="0 0 12 12" aria-hidden="true">
-					<path d="M3 6.25 5.25 8.5 9 4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"></path>
-				</svg>
-			case "Subtask", "Sub-task":
-				<svg class="size-3" viewBox="0 0 12 12" aria-hidden="true">
-					<rect x="2.5" y="2.5" width="4.5" height="4.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.25"></rect>
-					<rect x="5" y="5" width="4.5" height="4.5" rx="1" fill="currentColor"></rect>
-				</svg>
-			default:
-				<span class="text-[8px] leading-none font-bold">{ initials(issueType) }</span>
-		}
-	</span>
-}
-
-// priorityIcon draws the usual Jira priorities as arrows; other priority names show as text.
-templ priorityIcon(priority string) {
-	{{ path, colorClass := priorityShape(priority) }}
-	if path != "" {
-		<span title={ priority } role="img" aria-label={ priority } class={ "shrink-0", colorClass }>
-			<svg class="size-4" viewBox="0 0 16 16" aria-hidden="true">
-				<path d={ path } fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-			</svg>
-		</span>
-	} else if priority != "" {
-		<span title="Priority">{ priority }</span>
-	}
-}
-
-// avatar lays Jira's avatar picture over our initials. With an empty alt, a picture that fails to load shows nothing, so the initials stay visible.
-templ avatar(name, pictureURL string) {
-	if name == "" {
-		<span title="Unassigned" class="size-5 shrink-0 rounded-full border border-dashed border-fg-muted"></span>
-	} else {
-		<span title={ name } class="relative flex size-5 shrink-0 items-center justify-center rounded-full bg-accent text-[9px] font-semibold text-on-accent">
-			{ initials(name) }
-			if pictureURL != "" {
-				<img src={ templ.URL(pictureURL) } alt="" loading="lazy" referrerpolicy="no-referrer" class="absolute inset-0 size-full rounded-full object-cover"/>
-			}
-		</span>
-	}
-}
-
-// typeClass lives in this .templ file because Tailwind only scans .templ files for class names.
-func typeClass(issueType string) string {
-	switch issueType {
-	case "Story":
-		return "bg-story text-on-accent"
-	case "Bug":
-		return "bg-bug text-on-accent"
-	case "Task", "Subtask", "Sub-task":
-		return "bg-task text-on-accent"
-	default:
-		return "bg-chip text-fg"
-	}
-}
-
-// priorityShape returns an arrow path and colour for the usual Jira priority names, and nothing for others.
-func priorityShape(priority string) (path, colorClass string) {
-	switch priority {
-	case "Highest", "Blocker", "Critical":
-		return "M4 8l4-4 4 4M4 12l4-4 4 4", "text-priority-high"
-	case "High", "Major":
-		return "M4 10l4-4 4 4", "text-priority-high"
-	case "Medium":
-		return "M4 6h8M4 10h8", "text-priority-medium"
-	case "Low", "Minor":
-		return "M4 6l4 4 4-4", "text-priority-low"
-	case "Lowest", "Trivial":
-		return "M4 4l4 4 4-4M4 8l4 4 4-4", "text-priority-low"
-	}
-	return "", ""
-}
-
 // epicClass fills an epic's square with its colour from Jira; epics without one use the epic role.
 func epicClass(color string) string {
 	switch color {
@@ -202,34 +106,9 @@ func epicClass(color string) string {
 	}
 }
 
-func statusClass(category board.StatusCategory) string {
-	switch category {
-	case board.InProgress:
-		return "bg-progress-soft text-progress"
-	case board.Done:
-		return "bg-done-soft text-done"
-	default:
-		return "bg-chip text-fg"
-	}
-}
-
 func issueCount(count int) string {
 	if count == 1 {
 		return "1 issue"
 	}
 	return strconv.Itoa(count) + " issues"
-}
-
-// initials takes the first and last words, so "Ada King Lovelace" gives "AL".
-func initials(name string) string {
-	words := strings.Fields(name)
-	if len(words) == 0 {
-		return ""
-	}
-	first, _ := utf8.DecodeRuneInString(words[0])
-	if len(words) == 1 {
-		return string(unicode.ToUpper(first))
-	}
-	last, _ := utf8.DecodeRuneInString(words[len(words)-1])
-	return string([]rune{unicode.ToUpper(first), unicode.ToUpper(last)})
 }

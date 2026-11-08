@@ -1,7 +1,6 @@
-package web
+package views
 
-import "github.com/avanrish/dashboard-for-jira/internal/board"
-
+// layout is the HTML document every page shares.
 templ layout(title string) {
 	<!DOCTYPE html>
 	<html lang="en" class="h-full">
@@ -15,24 +14,4 @@ templ layout(title string) {
 			{ children... }
 		</body>
 	</html>
-}
-
-templ page(boardData board.Board) {
-	@layout(boardData.Name + " · Dashboard for Jira") {
-		<header class="flex items-center gap-4 border-b border-line bg-surface px-6 py-3">
-			<h1 class="text-lg font-semibold">{ boardData.Name }</h1>
-		</header>
-		<main class="min-h-0 flex-1 overflow-auto">
-			@boardView(boardData)
-		</main>
-	}
-}
-
-templ errorPage(message string) {
-	@layout("Error · Dashboard for Jira") {
-		<main class="m-auto max-w-xl p-6">
-			<h1 class="text-lg font-semibold">Could not load the board</h1>
-			<p class="mt-2 text-sm text-fg-muted">{ message }</p>
-		</main>
-	}
 }

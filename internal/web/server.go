@@ -6,12 +6,12 @@ import (
 	"embed"
 	"log/slog"
 	"net/http"
-	"net/url"
 	"time"
 
 	"github.com/a-h/templ"
 
 	"github.com/avanrish/dashboard-for-jira/internal/board"
+	"github.com/avanrish/dashboard-for-jira/internal/web/views"
 )
 
 //go:embed static
@@ -46,10 +46,10 @@ func (s *server) handlePage(w http.ResponseWriter, r *http.Request) {
 	case err != nil:
 		s.logger.ErrorContext(r.Context(), "loading the board", "duration", duration, "err", err)
 		// Not 502: templ's dev proxy retries those for minutes, taking them for a restarting server.
-		s.render(w, r, http.StatusInternalServerError, errorPage(err.Error()))
+		s.render(w, r, http.StatusInternalServerError, views.ErrorPage(err.Error()))
 	default:
 		s.logger.InfoContext(r.Context(), "loaded the board", "duration", duration)
-		s.render(w, r, http.StatusOK, page(boardData))
+		s.render(w, r, http.StatusOK, views.BoardPage(boardData))
 	}
 }
 
@@ -64,16 +64,4 @@ func (s *server) render(w http.ResponseWriter, r *http.Request, status int, comp
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(status)
 	_, _ = buf.WriteTo(w)
-}
-
-// allowLocalHost blocks DNS rebinding, where another domain is made to resolve to 127.0.0.1.
-func allowLocalHost(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch (&url.URL{Host: r.Host}).Hostname() {
-		case "localhost", "127.0.0.1", "::1":
-			next.ServeHTTP(w, r)
-		default:
-			http.Error(w, "This server only answers requests for localhost.", http.StatusForbidden)
-		}
-	})
 }

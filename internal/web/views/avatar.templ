@@ -1,0 +1,35 @@
+package views
+
+import (
+	"strings"
+	"unicode"
+	"unicode/utf8"
+)
+
+// avatar lays Jira's avatar picture over our initials. With an empty alt, a picture that fails to load shows nothing, so the initials stay visible.
+templ avatar(name, pictureURL string) {
+	if name == "" {
+		<span title="Unassigned" class="size-5 shrink-0 rounded-full border border-dashed border-fg-muted"></span>
+	} else {
+		<span title={ name } class="relative flex size-5 shrink-0 items-center justify-center rounded-full bg-accent text-[9px] font-semibold text-on-accent">
+			{ initials(name) }
+			if pictureURL != "" {
+				<img src={ templ.URL(pictureURL) } alt="" loading="lazy" referrerpolicy="no-referrer" class="absolute inset-0 size-full rounded-full object-cover"/>
+			}
+		</span>
+	}
+}
+
+// initials takes the first and last words, so "Ada King Lovelace" gives "AL".
+func initials(name string) string {
+	words := strings.Fields(name)
+	if len(words) == 0 {
+		return ""
+	}
+	first, _ := utf8.DecodeRuneInString(words[0])
+	if len(words) == 1 {
+		return string(unicode.ToUpper(first))
+	}
+	last, _ := utf8.DecodeRuneInString(words[len(words)-1])
+	return string([]rune{unicode.ToUpper(first), unicode.ToUpper(last)})
+}
