@@ -54,6 +54,9 @@ Copy `.env.example` to `.env` and fill in your Jira site, email, API token, and 
 <!-- LINT.ThenChange(//committed.toml:commit_subject) -->
 - Use narrow `LINT.IfChange` / `LINT.ThenChange` directives when duplicated cross-file content must stay in sync and cannot be eliminated.
   Write targets as repository-root paths starting with `//` (e.g. `//mise.toml:go_version`); ifttt-lint enforces them in CI.
+- Prefer building strings from parts with `fmt.Sprintf`, and errors with `fmt.Errorf`, over joining them with `+`; this includes expressions in `.templ` files.
+  Appending a piece to a string with `+=` is fine.
+  Prefer building URLs with `net/url` (`url.URL`, `JoinPath`, `url.Values`).
 
 ## Decisions
 
