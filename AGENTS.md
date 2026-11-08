@@ -43,8 +43,9 @@ CI runs tests on Linux.
 ## Configuration
 
 <!-- LINT.IfChange(configuration) -->
-The server reads its settings from environment variables and from a `.env` file in the current directory; variables set in the environment take precedence.
-Copy `.env.example` to `.env` and fill in your Jira site, email, API token, and board ID before running the server.
+The app reads its settings from environment variables, which take precedence, and from `config.json` in `~/.config/dashboard-for-jira/` (`%AppData%` on Windows); the README lists them.
+The API token never goes in that file: it comes from `JIRA_API_TOKEN` or the system's password store, through `github.com/zalando/go-keyring`.
+Tests must not touch the real password store: call `keyring.MockInit()` in any test that reads or saves a token.
 <!-- LINT.ThenChange(//README.md:configuration) -->
 
 ## Conventions
