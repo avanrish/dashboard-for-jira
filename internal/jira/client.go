@@ -55,7 +55,11 @@ func (e *APIError) Error() string {
 		message += fmt.Sprintf(": %s", strings.Join(e.Messages, "; "))
 	}
 	if e.StatusCode == http.StatusUnauthorized {
-		message += ". The API token may have expired: create a new one at https://id.atlassian.com/manage-profile/security/api-tokens and put it in .env."
+		// Jira's messages usually end with a full stop already.
+		message = fmt.Sprintf(
+			"%s. The API token may have expired: create a new one at https://id.atlassian.com/manage-profile/security/api-tokens and put it in .env.",
+			strings.TrimSuffix(message, "."),
+		)
 	}
 	return message
 }

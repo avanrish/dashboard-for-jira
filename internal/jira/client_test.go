@@ -53,9 +53,8 @@ func TestErrorShowsJiraMessages(t *testing.T) {
 	if !errors.As(err, &apiErr) || apiErr.StatusCode != http.StatusUnauthorized {
 		t.Fatalf("error = %v, want a 401 APIError", err)
 	}
-	for _, want := range []string{"Client must be authenticated", "API token may have expired"} {
-		if !strings.Contains(err.Error(), want) {
-			t.Errorf("error = %q, want it to contain %q", err, want)
-		}
+	// Jira's message already ends with a full stop, which the advice must not double.
+	if want := "Client must be authenticated to access this resource. The API token may have expired"; !strings.Contains(err.Error(), want) {
+		t.Errorf("error = %q, want it to contain %q", err, want)
 	}
 }
