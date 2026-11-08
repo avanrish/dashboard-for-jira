@@ -15,6 +15,18 @@ go install github.com/avanrish/dashboard-for-jira@latest
 This builds `dashboard-for-jira` into `$(go env GOPATH)/bin`, usually `~/go/bin`; add that directory to your `PATH` to run it from anywhere.
 Replace `@latest` with a release tag, such as `@v0.1.0`, to install that version, and run the command again to update.
 
+Then start the dashboard:
+
+```sh
+dashboard-for-jira start
+```
+
+The first time, it asks for your Jira site, email address, API token, and board, checks them with Jira, and saves them as described under [Configuration](#configuration); after that, it asks only for a setting that is missing.
+The dashboard is then at <http://127.0.0.1:8080>.
+
+To change a setting, or to replace an expired token, run `dashboard-for-jira configure`; press Enter to keep a value.
+Run `dashboard-for-jira` on its own to list the commands.
+
 ## Project structure
 
 <!-- LINT.IfChange(project_structure) -->
@@ -51,7 +63,8 @@ Each role has a light and a dark value, so templates need no `dark:` classes; wh
 ## Configuration
 
 <!-- LINT.IfChange(configuration) -->
-The app reads its settings from environment variables and from a settings file, `config.json`:
+`dashboard-for-jira start` asks for missing settings and `dashboard-for-jira configure` changes them; you can also edit the file yourself.
+The app reads them from environment variables and from a settings file, `config.json`:
 
 - macOS and Linux: `~/.config/dashboard-for-jira/config.json`, or under `$XDG_CONFIG_HOME` when it is set
 - Windows: `%AppData%\dashboard-for-jira\config.json`

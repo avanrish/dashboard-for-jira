@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"flag"
 	"fmt"
 	"log/slog"
 	"net"
@@ -15,23 +16,63 @@ import (
 	"time"
 
 	"github.com/avanrish/dashboard-for-jira/internal/config"
+	"github.com/avanrish/dashboard-for-jira/internal/configure"
 	"github.com/avanrish/dashboard-for-jira/internal/jira"
 	"github.com/avanrish/dashboard-for-jira/internal/web"
 )
 
+const usage = `A web dashboard for Jira, served on 127.0.0.1.
+
+Usage:
+  dashboard-for-jira <command>
+
+Commands:
+  start      serve the dashboard, first asking for any missing settings
+  configure  change the Jira site, email address, API token, board, or port
+  help       show this list
+`
+
 func main() {
-	if err := run(); err != nil {
+	flag.Usage = func() { _, _ = fmt.Fprint(flag.CommandLine.Output(), usage) }
+	flag.Parse()
+
+	var err error
+	switch command := flag.Arg(0); {
+	case flag.NArg() > 1:
+		flag.Usage()
+		os.Exit(2)
+	case command == "" || command == "help":
+		fmt.Print(usage)
+	case command == "start":
+		err = start()
+	case command == "configure":
+		// No signal handling here: Ctrl-C ends the program while it waits for an answer.
+		err = configure.Run(context.Background())
+	default:
+		_, _ = fmt.Fprintf(os.Stderr, "unknown command %q\n\n", command)
+		flag.Usage()
+		os.Exit(2)
+	}
+	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
 
-func run() error {
+// start serves the dashboard, first asking in the terminal for any setting that is missing.
+func start() error {
 	settings, err := config.Load()
+	var settingsErr *config.SettingsError
+	if errors.As(err, &settingsErr) && len(settingsErr.Missing) > 0 && configure.CanAsk() {
+		settings, err = configure.Missing(context.Background(), settingsErr.Missing)
+	}
 	if err != nil {
 		return err
 	}
+	return serve(settings)
+}
 
+func serve(settings config.Config) error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 

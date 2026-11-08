@@ -10,6 +10,7 @@ tool github.com/a-h/templ/cmd/templ
 require (
 	github.com/a-h/templ v0.3.1100
 	github.com/zalando/go-keyring v0.2.8
+	golang.org/x/term v0.47.0
 )
 
 require (

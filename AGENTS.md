@@ -45,6 +45,7 @@ CI runs tests on Linux.
 <!-- LINT.IfChange(configuration) -->
 The app reads its settings from environment variables, which take precedence, and from `config.json` in `~/.config/dashboard-for-jira/` (`%AppData%` on Windows); the README lists them.
 The API token never goes in that file: it comes from `JIRA_API_TOKEN` or the system's password store, through `github.com/zalando/go-keyring`.
+`dashboard-for-jira configure` (`internal/configure/`) asks for every setting in the terminal, and `start` asks for the missing ones instead of failing; both check them with Jira before saving.
 Tests must not touch the real password store: call `keyring.MockInit()` in any test that reads or saves a token.
 <!-- LINT.ThenChange(//README.md:configuration) -->
 
