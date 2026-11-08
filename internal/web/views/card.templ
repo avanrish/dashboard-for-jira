@@ -3,7 +3,7 @@ package views
 import "github.com/avanrish/dashboard-for-jira/internal/board"
 
 templ card(issue board.Issue) {
-	<a href={ templ.URL(issue.URL) } title={ issue.Summary } class="block rounded-md bg-card p-2 shadow-sm ring-1 ring-line hover:ring-accent focus-visible:outline-2 focus-visible:outline-accent">
+	<a href={ templ.URL(issue.URL) } target="_blank" rel="noopener noreferrer" title={ issue.Summary } class="block rounded-md bg-card p-2 shadow-sm ring-1 ring-line hover:ring-accent focus-visible:outline-2 focus-visible:outline-accent">
 		<p class="line-clamp-3 text-sm leading-snug">{ issue.Summary }</p>
 		<div class="mt-2 flex items-center gap-2 text-xs text-fg-muted">
 			<span class={ "max-w-full shrink-0 truncate rounded px-1.5 py-0.5 text-[11px] font-semibold uppercase", statusClass(issue.StatusCategory) }>{ issue.Status }</span>
