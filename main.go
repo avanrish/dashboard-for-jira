@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"strconv"
 	"syscall"
 	"time"
@@ -29,6 +30,7 @@ Usage:
 Commands:
   start      serve the dashboard, first asking for any missing settings
   configure  change the Jira site, email address, API token, board, or port
+  version    print the version
   help       show this list
 `
 
@@ -41,6 +43,8 @@ func main() {
 	case flag.NArg() > 1:
 		flag.Usage()
 		os.Exit(2)
+	case command == "version":
+		fmt.Println(version())
 	case command == "" || command == "help":
 		fmt.Print(usage)
 	case command == "start":
@@ -57,6 +61,15 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+}
+
+// version returns the version Go recorded in the binary: the release tag, such as v0.1.0, for go install,
+// or a pseudo-version naming the commit for a build from a checkout.
+func version() string {
+	if info, ok := debug.ReadBuildInfo(); ok {
+		return info.Main.Version
+	}
+	return "unknown"
 }
 
 // start serves the dashboard, first asking in the terminal for any setting that is missing.
