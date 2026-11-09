@@ -143,7 +143,8 @@ func (s session) run(ctx context.Context, asking func(name string) bool) (config
 		}
 		_, _ = fmt.Fprintln(s.out, "Saved the API token to the system's password store.")
 
-		if previousEmail != "" && previousEmail != settings.JiraEmail {
+		// The token saved for the file's old email is unused once the file names another, unless JIRA_EMAIL names it.
+		if previousEmail != "" && previousEmail != file.Email && previousEmail != settings.JiraEmail {
 			if err := config.DeleteToken(previousEmail); err != nil {
 				return config.Config{}, fmt.Errorf("removing the API token saved for %s: %w", previousEmail, err)
 			}

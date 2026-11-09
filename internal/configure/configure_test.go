@@ -137,6 +137,26 @@ func TestRunMovesTokenToNewEmail(t *testing.T) {
 	checkSavedToken(t, "ada@example.com", "")
 }
 
+func TestRunKeepsFileEmailTokenWhenEnvironmentSetsAnother(t *testing.T) {
+	s, out := newTestSession(t, "bob-token\n", "bob-token")
+	current := config.File{Site: "example.atlassian.net", Email: "ada@example.com", BoardID: 12}
+	if err := current.Save(s.path); err != nil {
+		t.Fatal(err)
+	}
+	if err := config.SaveToken("ada@example.com", "ada-token"); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("JIRA_EMAIL", "bob@example.com")
+
+	missing := []string{"JIRA_API_TOKEN"}
+	if _, err := s.run(t.Context(), func(name string) bool { return slices.Contains(missing, name) }); err != nil {
+		t.Fatalf("run() error = %v, output:\n%s", err, out)
+	}
+	checkFile(t, s.path, current)
+	checkSavedToken(t, "bob@example.com", "bob-token")
+	checkSavedToken(t, "ada@example.com", "ada-token")
+}
+
 func TestRunReplacesUnreadableFile(t *testing.T) {
 	s, out := newTestSession(t, "example.atlassian.net\nada@example.com\nsecret\n12\n\n", "secret")
 	if err := os.MkdirAll(filepath.Dir(s.path), 0o700); err != nil {
