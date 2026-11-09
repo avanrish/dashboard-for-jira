@@ -144,8 +144,8 @@ func Resolve(file File, token string) (Config, error) {
 	fileValues := map[string]string{
 		"JIRA_SITE":     file.Site,
 		"JIRA_EMAIL":    file.Email,
-		"JIRA_BOARD_ID": formatNumber(file.BoardID),
-		"PORT":          formatNumber(file.Port),
+		"JIRA_BOARD_ID": FormatNumber(file.BoardID),
+		"PORT":          FormatNumber(file.Port),
 	}
 	return parse(func(name string) string {
 		if value := os.Getenv(name); value != "" {
@@ -160,8 +160,8 @@ func Resolve(file File, token string) (Config, error) {
 	})
 }
 
-// formatNumber formats a number from the settings file, where 0 means the setting is missing.
-func formatNumber(n int) string {
+// FormatNumber formats a number from the settings file, where 0 means the setting is missing.
+func FormatNumber(n int) string {
 	if n == 0 {
 		return ""
 	}

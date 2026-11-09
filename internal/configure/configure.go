@@ -103,12 +103,12 @@ func (s session) run(ctx context.Context, asking func(name string) bool) (config
 		}
 	}
 	if asking("JIRA_BOARD_ID") {
-		if file.BoardID, err = ask(s, "JIRA_BOARD_ID", "Board ID, or the board's address", formatNumber(file.BoardID), parseBoardID); err != nil {
+		if file.BoardID, err = ask(s, "JIRA_BOARD_ID", "Board ID, or the board's address", config.FormatNumber(file.BoardID), parseBoardID); err != nil {
 			return config.Config{}, err
 		}
 	}
 	if asking("PORT") {
-		if file.Port, err = ask(s, "PORT", "Port to serve the dashboard on", formatNumber(cmp.Or(file.Port, 8080)), parsePort); err != nil {
+		if file.Port, err = ask(s, "PORT", "Port to serve the dashboard on", config.FormatNumber(cmp.Or(file.Port, 8080)), parsePort); err != nil {
 			return config.Config{}, err
 		}
 	}
@@ -201,14 +201,6 @@ func (s session) askToken(email string) (string, error) {
 		}
 		_, _ = fmt.Fprintln(s.out, "Enter an API token.")
 	}
-}
-
-// formatNumber formats a number setting for a question, where 0 means it is not set.
-func formatNumber(n int) string {
-	if n == 0 {
-		return ""
-	}
-	return strconv.Itoa(n)
 }
 
 // readLine reads one line, without surrounding spaces.
