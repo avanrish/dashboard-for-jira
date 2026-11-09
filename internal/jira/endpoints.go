@@ -13,6 +13,15 @@ const (
 	issueColorFieldType = "com.pyxis.greenhopper.jira:jsw-issue-color" // an epic's colour
 )
 
+// Myself returns the display name of the user the client signs in as, which checks the email address and API token.
+func (c *Client) Myself(ctx context.Context) (string, error) {
+	var user struct {
+		DisplayName string `json:"displayName"`
+	}
+	err := c.get(ctx, "/rest/api/3/myself", nil, &user)
+	return user.DisplayName, err
+}
+
 func (c *Client) BoardConfiguration(ctx context.Context, boardID int) (BoardConfiguration, error) {
 	var configuration BoardConfiguration
 	err := c.get(ctx, fmt.Sprintf("/rest/agile/1.0/board/%d/configuration", boardID), nil, &configuration)

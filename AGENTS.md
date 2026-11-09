@@ -7,7 +7,7 @@ A web dashboard for Jira.
 ## Project structure
 
 <!-- LINT.IfChange(project_structure) -->
-- `cmd/<name>/` — one directory per executable; keep `main.go` thin and call into `internal/`
+- `main.go` — the executable, at the repository root so `go install github.com/avanrish/dashboard-for-jira@latest` installs it; keep it thin and call into `internal/`
 - `internal/` — application code, not importable by other modules
 - `docs/decisions/` — architecture decision records explaining why the project is built the way it is
 - Tests live next to the code they test as `*_test.go` files, with fixtures in a package-local `testdata/`
@@ -43,8 +43,10 @@ CI runs tests on Linux.
 ## Configuration
 
 <!-- LINT.IfChange(configuration) -->
-The server reads its settings from environment variables and from a `.env` file in the current directory; variables set in the environment take precedence.
-Copy `.env.example` to `.env` and fill in your Jira site, email, API token, and board ID before running the server.
+The app reads its settings from environment variables, which take precedence, and from `config.json` in `~/.config/dashboard-for-jira/` (`%AppData%` on Windows); the README lists them.
+The API token never goes in that file: it comes from `JIRA_API_TOKEN` or the system's password store, through `github.com/zalando/go-keyring`.
+`dashboard-for-jira configure` (`internal/configure/`) asks for every setting in the terminal, and `start` asks for the missing ones instead of failing; both check them with Jira before saving.
+Tests must not touch the real password store: call `keyring.MockInit()` in any test that reads or saves a token.
 <!-- LINT.ThenChange(//README.md:configuration) -->
 
 ## Conventions
@@ -57,6 +59,8 @@ Copy `.env.example` to `.env` and fill in your Jira site, email, API token, and 
 - Prefer building strings from parts with `fmt.Sprintf`, and errors with `fmt.Errorf`, over joining them with `+`; this includes expressions in `.templ` files.
   Appending a piece to a string with `+=` is fine.
   Prefer building URLs with `net/url` (`url.URL`, `JoinPath`, `url.Values`).
+- Ask before adding a `//nolint` directive, and only for a finding that `mise run lint` actually reports and that cannot be fixed.
+- Separate the steps of a long function with blank lines.
 
 ## Decisions
 
@@ -71,3 +75,4 @@ If a `.jj` directory exists in the repository root, default to using `jj` (Jujut
 - Every commit on `main` must pass CI. Pull requests land as a squash or a merge commit, so a PR's own commits need not each pass.
 - Keep commits atomic: one responsibility each, with code, tests, and docs updated together. Put file renames in their own commit.
 - Squash pull requests by default. Use a merge commit only when the history is worth keeping, such as what was tried or how a bug was tracked down.
+- A release is a semantic version tag on `main`, such as `v0.1.0`, which `go install` resolves. Never move or delete a pushed tag: the Go module proxy keeps the first version it saw.

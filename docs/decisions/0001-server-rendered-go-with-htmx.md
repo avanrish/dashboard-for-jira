@@ -48,7 +48,7 @@ It should be small, simple, and fast, should not need a separate frontend projec
 - templ is pre-1.0, so upgrades may need small template changes.
 - The size benefit holds only while no reachable code calls `reflect.Value.Method` or `MethodByName`, which running `text/template` or `html/template` templates does.
   Importing those packages is not enough: templ imports `html/template` without calling those paths.
-  To check, run `go build -ldflags=-dumpdep -o /dev/null ./cmd/dashboard-for-jira 2>&1 | grep -F '<ReflectMethod>'`; any output means the linker has stopped removing unused methods.
+  To check, run `go build -ldflags=-dumpdep -o /dev/null . 2>&1 | grep -F '<ReflectMethod>'`; any output means the linker has stopped removing unused methods.
 - Most behaviour lives in Go handlers and is testable with `net/http/httptest`.
 - Handlers return HTML, not JSON.
   Adding another client, such as a CLI, would need a separate API.

@@ -1,6 +1,6 @@
 # 0002. Authenticate to Jira Cloud with a personal API token
 
-- Status: Accepted
+- Status: Accepted, amended by [0007](0007-keep-settings-in-config-dir-and-token-in-password-store.md)
 - Date: 2026-11-07
 
 ## Context

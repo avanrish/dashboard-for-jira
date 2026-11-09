@@ -1,7 +1,7 @@
 # Editor settings
 .idea/
 
-# Build output (e.g. go build -o bin/ ./cmd/...)
+# Build output (e.g. go build -o bin/ .)
 /bin/
 *.exe
 *.test
@@ -12,5 +12,5 @@
 # Text files templ writes in watch mode (mise run dev)
 *_templ.txt
 
-# Local settings, including the Jira API token (see .env.example)
+# Environment files, which may hold a Jira API token
 /.env

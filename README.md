@@ -4,10 +4,33 @@
 A web dashboard for Jira.
 <!-- LINT.ThenChange(//AGENTS.md:project_header) -->
 
+## Install
+
+With [Go](https://go.dev/dl/) installed, run:
+
+```sh
+go install github.com/avanrish/dashboard-for-jira@latest
+```
+
+This builds `dashboard-for-jira` into `$(go env GOPATH)/bin`, usually `~/go/bin`; add that directory to your `PATH` to run it from anywhere.
+Replace `@latest` with a release tag, such as `@v0.1.0`, to install that version, and run the command again to update.
+
+Then start the dashboard:
+
+```sh
+dashboard-for-jira start
+```
+
+The first time, it asks for your Jira site, email address, API token, and board, checks them with Jira, and saves them as described under [Configuration](#configuration); after that, it asks only for a setting that is missing.
+The dashboard is then at <http://127.0.0.1:8080>.
+
+To change a setting, or to replace an expired token, run `dashboard-for-jira configure`; press Enter to keep a value.
+Run `dashboard-for-jira` on its own to list the commands.
+
 ## Project structure
 
 <!-- LINT.IfChange(project_structure) -->
-- `cmd/<name>/` — one directory per executable; keep `main.go` thin and call into `internal/`
+- `main.go` — the executable, at the repository root so `go install github.com/avanrish/dashboard-for-jira@latest` installs it; keep it thin and call into `internal/`
 - `internal/` — application code, not importable by other modules
 - `docs/decisions/` — architecture decision records explaining why the project is built the way it is
 - Tests live next to the code they test as `*_test.go` files, with fixtures in a package-local `testdata/`
@@ -40,8 +63,34 @@ Each role has a light and a dark value, so templates need no `dark:` classes; wh
 ## Configuration
 
 <!-- LINT.IfChange(configuration) -->
-The server reads its settings from environment variables and from a `.env` file in the current directory; variables set in the environment take precedence.
-Copy `.env.example` to `.env` and fill in your Jira site, email, API token, and board ID before running the server.
+`dashboard-for-jira start` asks for missing settings and `dashboard-for-jira configure` changes them; you can also edit the file yourself.
+The app reads them from environment variables and from a settings file, `config.json`:
+
+- macOS and Linux: `~/.config/dashboard-for-jira/config.json`, or under `$XDG_CONFIG_HOME` when it is set
+- Windows: `%AppData%\dashboard-for-jira\config.json`
+
+```json
+{
+  "site": "example.atlassian.net",
+  "email": "ada@example.com",
+  "boardId": 12
+}
+```
+
+Variables set in the environment take precedence over the file:
+
+| Key | Variable | Description |
+| --- | --- | --- |
+| `site` | `JIRA_SITE` | Your Jira Cloud site, without `https://`, such as `example.atlassian.net` |
+| `email` | `JIRA_EMAIL` | The email address of your Atlassian account |
+| `boardId` | `JIRA_BOARD_ID` | The number in the board's address: `.../boards/<id>` |
+| `port` | `PORT` | Optional. The port on `127.0.0.1` to serve the dashboard on; `mise run dev` expects the default, 8080 |
+
+The API token never goes in the file.
+Create one at <https://id.atlassian.com/manage-profile/security/api-tokens>; it expires within a year.
+The app reads it from the `JIRA_API_TOKEN` environment variable, or else from the system's password store: Keychain on macOS, Credential Manager on Windows, or the Secret Service, such as GNOME Keyring or KWallet, on Linux.
+There it is saved under the service `dashboard-for-jira` and your email address.
+On a machine without a password store, such as a server without a desktop session, set `JIRA_API_TOKEN` in the environment.
 <!-- LINT.ThenChange(//AGENTS.md:configuration) -->
 
 ## License
