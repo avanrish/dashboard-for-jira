@@ -57,7 +57,7 @@ func (e *APIError) Error() string {
 	if e.StatusCode == http.StatusUnauthorized {
 		// Jira's messages usually end with a full stop already.
 		message = fmt.Sprintf(
-			"%s. The API token may have expired: run dashboard-for-jira configure to replace it.",
+			"%s. The API token may have expired: run dashboard-for-jira configure to replace it, or update JIRA_API_TOKEN if you set it.",
 			strings.TrimSuffix(message, "."),
 		)
 	}
