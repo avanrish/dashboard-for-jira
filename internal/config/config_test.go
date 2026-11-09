@@ -156,6 +156,27 @@ func TestSaveWritesAFileOnlyTheUserCanRead(t *testing.T) {
 	}
 }
 
+func TestSaveMakesAnExistingFileOnlyTheUserCanRead(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Windows has no Unix permission bits.")
+	}
+	path := writeFile(t, "{}\n")
+	if err := os.Chmod(path, 0o644); err != nil { //nolint:gosec // G302: the test makes the file readable by others on purpose
+		t.Fatal(err)
+	}
+
+	if err := (File{Site: "example.atlassian.net"}).Save(path); err != nil {
+		t.Fatal(err)
+	}
+	info, err := os.Stat(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if mode := info.Mode().Perm(); mode != 0o600 {
+		t.Errorf("file mode = %v, want -rw-------", mode)
+	}
+}
+
 func TestReadMissingFile(t *testing.T) {
 	got, err := ReadFile(filepath.Join(t.TempDir(), "config.json"))
 	if err != nil || got != (File{}) {

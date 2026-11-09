@@ -107,7 +107,11 @@ func (f File) Save(path string) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		return err
 	}
-	return os.WriteFile(path, append(data, '\n'), 0o600)
+	if err := os.WriteFile(path, append(data, '\n'), 0o600); err != nil {
+		return err
+	}
+	// WriteFile sets the permissions only when it creates the file, and the user may have created it by hand.
+	return os.Chmod(path, 0o600)
 }
 
 // Load reads settings from environment variables and from the settings file, if it exists.
