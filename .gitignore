@@ -12,5 +12,5 @@
 # Text files templ writes in watch mode (mise run dev)
 *_templ.txt
 
-# Environment files, which may hold a Jira API token; the app no longer reads them
+# Environment files, which may hold a Jira API token
 /.env
