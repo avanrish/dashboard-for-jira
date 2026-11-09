@@ -59,6 +59,8 @@ Tests must not touch the real password store: call `keyring.MockInit()` in any t
 - Prefer building strings from parts with `fmt.Sprintf`, and errors with `fmt.Errorf`, over joining them with `+`; this includes expressions in `.templ` files.
   Appending a piece to a string with `+=` is fine.
   Prefer building URLs with `net/url` (`url.URL`, `JoinPath`, `url.Values`).
+- Ask before adding a `//nolint` directive, and only for a finding that `mise run lint` actually reports and that cannot be fixed.
+- Separate the steps of a long function with blank lines.
 
 ## Decisions
 
