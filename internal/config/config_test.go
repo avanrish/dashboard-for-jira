@@ -63,7 +63,7 @@ func TestLoadRejectsUnknownKeys(t *testing.T) {
 	unsetenv(t, "JIRA_SITE", "JIRA_EMAIL", "JIRA_API_TOKEN", "JIRA_BOARD_ID", "PORT")
 
 	_, err := load(path)
-	if err == nil || !strings.Contains(err.Error(), `unknown field "apiToken"`) {
+	if err == nil || !strings.Contains(err.Error(), `unknown object member name "apiToken"`) {
 		t.Errorf("load() error = %v, want one about the unknown apiToken key", err)
 	}
 }
@@ -160,5 +160,32 @@ func TestReadMissingFile(t *testing.T) {
 	got, err := ReadFile(filepath.Join(t.TempDir(), "config.json"))
 	if err != nil || got != (File{}) {
 		t.Errorf("ReadFile() = %+v, %v, want empty settings and no error", got, err)
+	}
+}
+
+func TestReadEmptyFile(t *testing.T) {
+	for _, content := range []string{"", " \n"} {
+		got, err := ReadFile(writeFile(t, content))
+		if err != nil || got != (File{}) {
+			t.Errorf("ReadFile() of %q = %+v, %v, want empty settings and no error", content, got, err)
+		}
+	}
+}
+
+func TestReadFileRejectsAnythingButOneObject(t *testing.T) {
+	tests := map[string]string{
+		"a key after the closing brace": "{\"site\": \"example.atlassian.net\", \"boardId\": 7}\n  \"port\": 9090\n}\n",
+		"an extra closing brace":        "{\"site\": \"example.atlassian.net\", \"boardId\": 7}}\n",
+		"a second object":               "{\"site\": \"example.atlassian.net\"}\n{\"boardId\": 7}\n",
+		"a trailing comma":              `{"site": "example.atlassian.net", "boardId": 7,}`,
+		"a repeated key":                `{"boardId": 7, "boardId": 8}`,
+		"a key in another case":         `{"Site": "example.atlassian.net"}`,
+	}
+	for name, content := range tests {
+		t.Run(name, func(t *testing.T) {
+			if got, err := ReadFile(writeFile(t, content)); err == nil {
+				t.Errorf("ReadFile() = %+v, nil, want an error", got)
+			}
+		})
 	}
 }

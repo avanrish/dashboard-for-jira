@@ -3,7 +3,8 @@ package config
 
 import (
 	"bytes"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -47,7 +48,7 @@ type File struct {
 	Site    string `json:"site"`
 	Email   string `json:"email"`
 	BoardID int    `json:"boardId"`
-	Port    int    `json:"port,omitempty"` // 0 means the default
+	Port    int    `json:"port,omitzero"` // 0 means the default
 }
 
 // Path returns where the settings file is: config.json in the app's directory under the user's config directory.
@@ -75,7 +76,8 @@ func userConfigDir() (string, error) {
 	return filepath.Join(home, ".config"), nil
 }
 
-// ReadFile reads the settings file at path. A missing file gives empty settings rather than an error.
+// ReadFile reads the settings file at path. A missing or empty file gives empty settings rather than an error.
+// Anything but a single JSON object with known, unrepeated keys is an error, so a mistake in a hand-edited file is reported instead of ignored.
 func ReadFile(path string) (File, error) {
 	data, err := os.ReadFile(filepath.Clean(path))
 	if errors.Is(err, fs.ErrNotExist) {
@@ -84,10 +86,13 @@ func ReadFile(path string) (File, error) {
 	if err != nil {
 		return File{}, err
 	}
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
+	if len(bytes.TrimSpace(data)) == 0 {
+		return File{}, nil
+	}
+
+	// Unlike encoding/json's Decoder, which stops after the first value, json/v2 also rejects anything after the object.
 	var file File
-	if err := decoder.Decode(&file); err != nil {
+	if err := json.Unmarshal(data, &file, json.RejectUnknownMembers(true)); err != nil {
 		return File{}, fmt.Errorf("%s: %w", path, err)
 	}
 	return file, nil
@@ -95,7 +100,7 @@ func ReadFile(path string) (File, error) {
 
 // Save writes the settings file at path, creating its directory, readable only by the user.
 func (f File) Save(path string) error {
-	data, err := json.MarshalIndent(f, "", "  ")
+	data, err := json.Marshal(f, jsontext.WithIndent("  "))
 	if err != nil {
 		return err
 	}
