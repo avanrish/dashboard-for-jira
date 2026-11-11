@@ -19,11 +19,14 @@ import (
 // maxRetries limits how often one request is repeated after Jira rate-limits it.
 const maxRetries = 3
 
+// Client calls Jira's REST API. It keeps successful responses in memory and reuses them for as long as
+// a request's RequestOptions allow.
 type Client struct {
 	baseURL    *url.URL
 	email      string
 	apiToken   string
 	httpClient *http.Client
+	cache      responseCache
 }
 
 // NewClient returns a client that authenticates with an API token over basic auth.
@@ -34,6 +37,7 @@ func NewClient(baseURL *url.URL, email, apiToken string) *Client {
 		email:      email,
 		apiToken:   apiToken,
 		httpClient: &http.Client{Timeout: 30 * time.Second},
+		cache:      responseCache{now: time.Now},
 	}
 }
 
@@ -64,44 +68,51 @@ func (e *APIError) Error() string {
 	return message
 }
 
-// get decodes the JSON response to a GET request into out, waiting and retrying when Jira rate-limits it.
-func (c *Client) get(ctx context.Context, path string, query url.Values, out any) error {
+// get decodes the JSON response to a GET request into out, reusing a cached response when it is recent enough.
+func (c *Client) get(ctx context.Context, path string, query url.Values, out any, options RequestOptions) error {
 	endpoint := c.baseURL.JoinPath(path)
 	endpoint.RawQuery = query.Encode()
+	return c.cached(endpoint.String(), options, out, func() ([]byte, error) {
+		return c.fetch(ctx, endpoint.String())
+	})
+}
+
+// fetch returns the body of Jira's response to a GET request, waiting and retrying when Jira rate-limits it.
+func (c *Client) fetch(ctx context.Context, endpoint string) ([]byte, error) {
 	for attempt := 0; ; attempt++ {
-		err := c.getOnce(ctx, endpoint.String(), out)
+		body, err := c.fetchOnce(ctx, endpoint)
 		var apiErr *APIError
 		if attempt == maxRetries || !errors.As(err, &apiErr) || apiErr.StatusCode != http.StatusTooManyRequests {
-			return err
+			return body, err
 		}
 		timer := time.NewTimer(apiErr.RetryAfter)
 		select {
 		case <-ctx.Done():
 			timer.Stop()
-			return ctx.Err()
+			return nil, ctx.Err()
 		case <-timer.C:
 		}
 	}
 }
 
-func (c *Client) getOnce(ctx context.Context, endpoint string, out any) error {
+func (c *Client) fetchOnce(ctx context.Context, endpoint string) ([]byte, error) {
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	request.SetBasicAuth(c.email, c.apiToken)
 	request.Header.Set("Accept", "application/json")
 
 	response, err := c.httpClient.Do(request)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer func() { _ = response.Body.Close() }()
 
 	if response.StatusCode < 200 || response.StatusCode > 299 {
-		return newAPIError(response)
+		return nil, newAPIError(response)
 	}
-	return json.NewDecoder(response.Body).Decode(out)
+	return io.ReadAll(response.Body)
 }
 
 func newAPIError(response *http.Response) *APIError {

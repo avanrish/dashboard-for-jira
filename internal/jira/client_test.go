@@ -32,7 +32,7 @@ func TestRateLimitedRequestIsRetried(t *testing.T) {
 	}))
 	defer server.Close()
 
-	configuration, err := newTestClient(t, server.URL).BoardConfiguration(t.Context(), 7)
+	configuration, err := newTestClient(t, server.URL).BoardConfiguration(t.Context(), 7, RequestOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,7 +48,7 @@ func TestErrorShowsJiraMessages(t *testing.T) {
 	}))
 	defer server.Close()
 
-	_, err := newTestClient(t, server.URL).BoardConfiguration(t.Context(), 7)
+	_, err := newTestClient(t, server.URL).BoardConfiguration(t.Context(), 7, RequestOptions{})
 	var apiErr *APIError
 	if !errors.As(err, &apiErr) || apiErr.StatusCode != http.StatusUnauthorized {
 		t.Fatalf("error = %v, want a 401 APIError", err)
