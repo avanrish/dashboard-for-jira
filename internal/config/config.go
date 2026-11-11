@@ -51,7 +51,6 @@ type File struct {
 	Port    int    `json:"port,omitzero"` // 0 means the default
 }
 
-// Path returns where the settings file is: config.json in the app's directory under the user's config directory.
 func Path() (string, error) {
 	dir, err := userConfigDir()
 	if err != nil {
@@ -98,7 +97,6 @@ func ReadFile(path string) (File, error) {
 	return file, nil
 }
 
-// Save writes the settings file at path, creating its directory, readable only by the user.
 func (f File) Save(path string) error {
 	data, err := json.Marshal(f, jsontext.WithIndent("  "))
 	if err != nil {
@@ -174,12 +172,10 @@ func SavedToken(email string) (string, error) {
 	return keyring.Get(AppName, email)
 }
 
-// SaveToken saves the API token for email in the system's password store, replacing any saved before.
 func SaveToken(email, token string) error {
 	return keyring.Set(AppName, email, token)
 }
 
-// DeleteToken removes the API token saved for email from the system's password store, if there is one.
 func DeleteToken(email string) error {
 	if err := keyring.Delete(AppName, email); err != nil && !errors.Is(err, keyring.ErrNotFound) {
 		return err

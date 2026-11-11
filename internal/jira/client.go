@@ -41,7 +41,6 @@ func NewClient(baseURL *url.URL, email, apiToken string) *Client {
 	}
 }
 
-// IssueURL returns the address of an issue's page in Jira.
 func (c *Client) IssueURL(key string) string {
 	return c.baseURL.JoinPath("browse", key).String()
 }

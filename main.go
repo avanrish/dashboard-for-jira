@@ -72,7 +72,6 @@ func version() string {
 	return "unknown"
 }
 
-// start serves the dashboard, first asking in the terminal for any setting that is missing.
 func start() error {
 	settings, err := config.Load()
 	var settingsErr *config.SettingsError

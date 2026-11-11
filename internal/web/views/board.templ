@@ -7,7 +7,6 @@ import (
 	"github.com/avanrish/dashboard-for-jira/internal/board"
 )
 
-// BoardPage shows a board with its columns and epic lanes.
 templ BoardPage(boardData board.Board) {
 	@layout(fmt.Sprintf("%s · Dashboard for Jira", boardData.Name)) {
 		<header class="flex items-center gap-4 border-b border-line bg-surface px-6 py-3">

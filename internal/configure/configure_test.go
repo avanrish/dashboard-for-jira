@@ -19,7 +19,6 @@ import (
 	"github.com/avanrish/dashboard-for-jira/internal/config"
 )
 
-// everything asks for every setting, as Run does.
 func everything(string) bool { return true }
 
 // newTestSession returns a session that answers the questions with input and talks to a fake Jira that accepts token.

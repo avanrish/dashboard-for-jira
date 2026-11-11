@@ -44,7 +44,6 @@ type cacheEntry struct {
 	expires time.Time // when put drops the entry, which bounds memory use
 }
 
-// get returns the response stored for key if it is younger than maxAge.
 func (c *responseCache) get(key string, maxAge time.Duration) ([]byte, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -55,7 +54,6 @@ func (c *responseCache) get(key string, maxAge time.Duration) ([]byte, bool) {
 	return entry.body, true
 }
 
-// put stores a response just fetched by a request with the given TTL, replacing the older one, and drops expired entries.
 func (c *responseCache) put(key string, body []byte, ttl time.Duration) {
 	c.mu.Lock()
 	defer c.mu.Unlock()

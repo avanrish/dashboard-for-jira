@@ -64,7 +64,6 @@ func typeClass(issueType string) string {
 	}
 }
 
-// priorityShape returns an arrow path and colour for the usual Jira priority names, and nothing for others.
 func priorityShape(priority string) (path, colorClass string) {
 	switch priority {
 	case "Highest", "Blocker", "Critical":
