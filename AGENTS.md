@@ -68,7 +68,8 @@ Tests must not touch the real password store: call `keyring.MockInit()` in any t
 
 Before changing architecture, dependencies, or how the app talks to Jira, read the records in `docs/decisions/`.
 Do not go against an accepted record silently: propose a new record that supersedes it.
-When you make a decision a reader could not work out from the code, add a record following `docs/decisions/README.md`.
+Add a record only for a decision that shapes the whole project and is costly to reverse, such as the stack, how the app authenticates, where it keeps data, or how it is distributed; most changes need none.
+Write records following `docs/decisions/README.md`, and never rewrite one that has been pushed: amend or supersede it with a new record.
 
 ## Version control
 
