@@ -3,8 +3,8 @@ package board
 
 type Board struct {
 	Name    string
-	Columns []string // column names, left to right
-	Lanes   []Lane   // one per epic, then one for issues without an epic
+	Columns []string
+	Lanes   []Lane // one per epic, then one for issues without an epic
 }
 
 // Lane holds the issues of one epic, split by column.
@@ -23,13 +23,13 @@ type Epic struct {
 type Issue struct {
 	Key            string
 	Summary        string
-	Type           string // e.g. Story, Bug, or Task
+	Type           string
 	Status         string
 	StatusCategory StatusCategory
-	Priority       string // empty when unset
-	Assignee       string // display name; empty when unassigned
-	AssigneeAvatar string // URL of the assignee's avatar picture from Jira
-	Team           string // empty when unset
+	Priority       string
+	Assignee       string // display name
+	AssigneeAvatar string
+	Team           string
 	Flagged        bool
 	URL            string
 }

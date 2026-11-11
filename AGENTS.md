@@ -63,12 +63,14 @@ Tests must not touch the real password store: call `keyring.MockInit()` in any t
   The zero value should be the safe choice: `RequestOptions{}` always asks Jira, and a caller gets a cached response only by setting `CacheTTL`.
 - Ask before adding a `//nolint` directive, and only for a finding that `mise run lint` actually reports and that cannot be fixed.
 - Separate the steps of a long function with blank lines.
+- Write a comment only where a reader would otherwise misread the code; most choices need no explanation.
 
 ## Decisions
 
 Before changing architecture, dependencies, or how the app talks to Jira, read the records in `docs/decisions/`.
 Do not go against an accepted record silently: propose a new record that supersedes it.
-When you make a decision a reader could not work out from the code, add a record following `docs/decisions/README.md`.
+Add a record only for a decision that shapes the whole project and is costly to reverse, such as the stack, how the app authenticates, where it keeps data, or how it is distributed; most changes need none.
+Write records following `docs/decisions/README.md`, and never rewrite one that has been pushed: amend or supersede it with a new record.
 
 ## Version control
 

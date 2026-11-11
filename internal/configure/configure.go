@@ -46,7 +46,6 @@ func Missing(ctx context.Context, missing []string) (config.Config, error) {
 	return s.run(ctx, func(name string) bool { return slices.Contains(missing, name) })
 }
 
-// CanAsk reports whether standard input is a terminal, where someone can answer questions.
 func CanAsk() bool {
 	return term.IsTerminal(int(os.Stdin.Fd()))
 }
@@ -55,7 +54,7 @@ type session struct {
 	path       string // the settings file
 	in         *bufio.Reader
 	out        io.Writer
-	readSecret func() (string, error) // reads a line without showing it
+	readSecret func() (string, error)
 	siteURL    func(site string) *url.URL
 }
 
@@ -203,7 +202,6 @@ func (s session) askToken(email string) (string, error) {
 	}
 }
 
-// readLine reads one line, without surrounding spaces.
 func readLine(in *bufio.Reader) (string, error) {
 	line, err := in.ReadString('\n')
 	if errors.Is(err, io.EOF) {

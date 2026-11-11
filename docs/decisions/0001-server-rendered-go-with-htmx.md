@@ -1,6 +1,6 @@
 # 0001. Serve server-rendered HTML from Go with templ, htmx, Alpine.js, and Tailwind
 
-- Status: Accepted, amended by [0004](0004-run-templ-cli-as-go-tool.md)
+- Status: Accepted
 - Date: 2026-11-07
 
 ## Context
@@ -19,7 +19,8 @@ It should be small, simple, and fast, should not need a separate frontend projec
   Its base styles (Preflight) remove most differences between browsers' default styles.
 - htmx and Alpine.js are vendored into the repository at pinned versions.
   All static assets are embedded into the binary with `embed`; there is no CDN.
-- The templ and Tailwind CLIs are pinned in `mise.toml`.
+- The Tailwind CLI is pinned in `mise.toml`.
+  The templ CLI runs as `go tool templ`, so one version in `go.mod` pins both the CLI and the library its generated code calls, which must match.
 - Generated files are committed: templ's `*_templ.go` files and the compiled Tailwind stylesheet.
   A plain `go build` then works without either CLI, and CI fails if regenerating them changes anything.
 - During development, `templ generate --watch --proxy` regenerates templates, restarts the server, and reloads the browser.
@@ -35,6 +36,7 @@ It should be small, simple, and fast, should not need a separate frontend projec
 - **Hand-written CSS or a classless framework such as Pico CSS**: no build step, but slower to style, and a classless framework still needs custom CSS for the board itself.
 - **Loading htmx and Alpine.js from a CDN**: nothing to vendor, but every page load depends on a third party and the app stops working offline.
 - **Git-ignoring generated files**: cleaner diffs, but every build, including `go install`, would need both CLIs, and a forgotten step ships broken pages.
+- **Pinning the templ CLI in `mise.toml`**, like the other tools: keeps the CLI's dependencies out of `go.mod`, but its version and the library's can drift apart, and Renovate updates them in separate pull requests.
 
 ## Consequences
 
@@ -46,6 +48,8 @@ It should be small, simple, and fast, should not need a separate frontend projec
 - Generated code appears in diffs.
   Review the source files, not the output.
 - templ is pre-1.0, so upgrades may need small template changes.
+- The templ CLI's dependencies appear in `go.mod` as indirect requirements.
+  They are not linked into the binary, but they share one version of each module with the app.
 - The size benefit holds only while no reachable code calls `reflect.Value.Method` or `MethodByName`, which running `text/template` or `html/template` templates does.
   Importing those packages is not enough: templ imports `html/template` without calling those paths.
   To check, run `go build -ldflags=-dumpdep -o /dev/null . 2>&1 | grep -F '<ReflectMethod>'`; any output means the linker has stopped removing unused methods.

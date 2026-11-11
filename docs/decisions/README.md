@@ -6,13 +6,14 @@ They exist mainly for AI coding agents and new contributors, who see the code bu
 
 ## When to write one
 
-Write a record when a decision is hard to reverse, or when a reader could not work out the reasoning from the code alone, such as choosing a library, a protocol, a storage approach, or deliberately not doing the obvious thing.
-Skip it for choices that are cheap to change or self-evident from the code.
+Write a record only for a decision that shapes the whole project and is costly to reverse, such as the stack, how the app authenticates, where it keeps data, or how it is distributed.
+Most changes need none.
 
 ## Format
 
-- One file per decision, named `NNNN-short-title.md` with the next free number.
+- One file per decision, named `NNNN-short-title.md`, numbered one higher than the highest record here.
 - Start from [`template.md`](template.md) and keep it short: a reader should finish in a couple of minutes.
+- Describe the decision, not its implementation: leave out what the code already shows, so the record stays true as the code changes.
 - Status is one of `Proposed`, `Accepted`, `Accepted, amended by NNNN`, `Rejected`, `Deprecated`, or `Superseded by NNNN`.
 
 ## Changing a decision
