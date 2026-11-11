@@ -1,4 +1,4 @@
-# 0006. Distribute the app through `go install` only
+# 0004. Distribute the app through `go install` only
 
 - Status: Accepted
 - Date: 2026-11-08

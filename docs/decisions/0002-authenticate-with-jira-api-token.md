@@ -7,7 +7,7 @@
 
 The dashboard talks to Jira Cloud's REST API on behalf of one person, the developer running it on their own machine.
 There are no other users, no hosted deployment, and no sign-in screen to build.
-People install it with `go install` ([ADR 0006](0006-distribute-through-go-install.md)) and run it from any directory, without a clone of the repository.
+People install it with `go install` ([ADR 0004](0004-distribute-through-go-install.md)) and run it from any directory, without a clone of the repository.
 
 Jira Cloud offers these ways for an external app to authenticate:
 
