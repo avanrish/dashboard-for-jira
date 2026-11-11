@@ -1,6 +1,6 @@
 [tools]
 # LINT.IfChange(go_version)
-go = "1.27.3"
+go = "1.27.4"
 # LINT.ThenChange(//go.mod:go_version)
 # LINT.IfChange(committed_version)
 committed = "1.1.11"
