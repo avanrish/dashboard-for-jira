@@ -1,6 +1,6 @@
 # 0003. Query Jira live, without a local database
 
-- Status: Accepted, amended by [0005](0005-fetch-board-issues-from-jira-software-api.md)
+- Status: Accepted, amended by [0005](0005-fetch-board-issues-from-jira-software-api.md) and [0008](0008-cache-jira-responses-in-memory.md)
 - Date: 2026-11-07
 
 ## Context

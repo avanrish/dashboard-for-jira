@@ -126,7 +126,7 @@ func (s session) run(ctx context.Context, asking func(name string) bool) (config
 		return config.Config{}, fmt.Errorf("signing in to %s failed, so nothing was saved: %w", settings.JiraSite, err)
 	}
 
-	board, err := client.BoardConfiguration(ctx, settings.JiraBoardID)
+	board, err := client.BoardConfiguration(ctx, settings.JiraBoardID, jira.RequestOptions{})
 	if err != nil {
 		return config.Config{}, fmt.Errorf("opening board %d failed, so nothing was saved: %w", settings.JiraBoardID, err)
 	}

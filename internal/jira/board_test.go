@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"slices"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/avanrish/dashboard-for-jira/internal/board"
@@ -48,7 +49,9 @@ const lastIssuePageJSON = `{"issues": [
 		"parent": {"id": "108", "key": "DASH-8", "fields": {"summary": "Speed up builds", "issuetype": {"name": "Story", "hierarchyLevel": 0}}}}}
 ]}`
 
-func TestBoardGroupsIssuesIntoEpicLanes(t *testing.T) {
+// newBoardServer serves board 7 with the issues above, and returns a function that counts the requests to a path.
+func newBoardServer(t *testing.T) (*httptest.Server, func(path string) int) {
+	t.Helper()
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /rest/agile/1.0/board/7/configuration", func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = io.WriteString(w, configurationJSON)
@@ -100,9 +103,24 @@ func TestBoardGroupsIssuesIntoEpicLanes(t *testing.T) {
 			http.Error(w, "unexpected jql", http.StatusBadRequest)
 		}
 	})
-	server := httptest.NewServer(mux)
-	defer server.Close()
+	var mu sync.Mutex
+	counts := make(map[string]int)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		counts[r.URL.Path]++
+		mu.Unlock()
+		mux.ServeHTTP(w, r)
+	}))
+	t.Cleanup(server.Close)
+	return server, func(path string) int {
+		mu.Lock()
+		defer mu.Unlock()
+		return counts[path]
+	}
+}
 
+func TestBoardGroupsIssuesIntoEpicLanes(t *testing.T) {
+	server, _ := newBoardServer(t)
 	source := BoardSource{Client: newTestClient(t, server.URL), BoardID: 7}
 	got, err := source.Board(t.Context())
 	if err != nil {
@@ -138,6 +156,31 @@ func TestBoardGroupsIssuesIntoEpicLanes(t *testing.T) {
 	}
 	if card := got.Lanes[2].Cells[2][0]; card != wantCard {
 		t.Errorf("card = %+v, want %+v", card, wantCard)
+	}
+}
+
+// A reload fetches the issues again, but reuses the cached settings and searches.
+func TestBoardReloadFetchesOnlyIssues(t *testing.T) {
+	server, requests := newBoardServer(t)
+	source := BoardSource{Client: newTestClient(t, server.URL), BoardID: 7}
+	for range 2 {
+		if _, err := source.Board(t.Context()); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	for _, want := range []struct {
+		path     string
+		requests int
+	}{
+		{"/rest/agile/1.0/board/7/configuration", 1},
+		{"/rest/api/3/field", 1},
+		{"/rest/software/1.0/board/7/issue", 4}, // two pages, twice
+		{"/rest/api/3/search/jql", 2},           // the subtasks' parents and the epics' order, once each
+	} {
+		if got := requests(want.path); got != want.requests {
+			t.Errorf("%s: %d requests, want %d", want.path, got, want.requests)
+		}
 	}
 }
 

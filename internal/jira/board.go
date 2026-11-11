@@ -8,9 +8,14 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/avanrish/dashboard-for-jira/internal/board"
 )
+
+// boardCacheTTL is how long a board reuses what changes rarely: its settings, the site's fields,
+// and the subtasks' parents and the epics' order and colours.
+const boardCacheTTL = 5 * time.Minute
 
 // boardFields lists the issue fields the board shows; requesting only these keeps responses small.
 var boardFields = []string{"summary", "status", "issuetype", "priority", "assignee", "parent", "flagged"}
@@ -29,8 +34,9 @@ func (s BoardSource) Board(ctx context.Context) (board.Board, error) {
 	var customFields CustomFields
 	var configurationErr, customFieldsErr error
 	var wait sync.WaitGroup
-	wait.Go(func() { configuration, configurationErr = s.Client.BoardConfiguration(ctx, s.BoardID) })
-	wait.Go(func() { customFields, customFieldsErr = s.Client.CustomFields(ctx) })
+	cached := RequestOptions{CacheTTL: boardCacheTTL}
+	wait.Go(func() { configuration, configurationErr = s.Client.BoardConfiguration(ctx, s.BoardID, cached) })
+	wait.Go(func() { customFields, customFieldsErr = s.Client.CustomFields(ctx, cached) })
 	wait.Wait()
 	// An expired token or a wrong site fails both requests the same way, so report only the first error.
 	if err := cmp.Or(configurationErr, customFieldsErr); err != nil {
@@ -61,7 +67,9 @@ func (s BoardSource) Board(ctx context.Context) (board.Board, error) {
 	if customFields.Team != "" {
 		fields = append(slices.Clone(boardFields), customFields.Team)
 	}
-	issues, err := s.Client.BoardIssues(ctx, s.BoardID, jql, fields)
+	// Fetch the issues on every load, so the cards are never stale. The searches below stay cached, but their URLs list
+	// the IDs these issues mention, so they still go to Jira when a new epic or parent appears.
+	issues, err := s.Client.BoardIssues(ctx, s.BoardID, jql, fields, RequestOptions{})
 	if err != nil {
 		return board.Board{}, fmt.Errorf("loading the issues of board %d: %w", s.BoardID, err)
 	}
@@ -69,7 +77,7 @@ func (s BoardSource) Board(ctx context.Context) (board.Board, error) {
 	var parents []Issue
 	if ids := missingParents(issues); len(ids) > 0 {
 		jql := fmt.Sprintf("id in (%s)", strings.Join(ids, ", "))
-		parents, err = s.Client.SearchIssues(ctx, jql, []string{"parent"})
+		parents, err = s.Client.SearchIssues(ctx, jql, []string{"parent"}, cached)
 		if err != nil {
 			return board.Board{}, fmt.Errorf("loading the parents of subtasks on board %d: %w", s.BoardID, err)
 		}
@@ -86,7 +94,7 @@ func (s BoardSource) Board(ctx context.Context) (board.Board, error) {
 			epicFields = []string{customFields.IssueColor}
 		}
 		jql := fmt.Sprintf("id in (%s) ORDER BY Rank ASC", strings.Join(slices.Sorted(maps.Keys(ids)), ", "))
-		rankedEpics, err = s.Client.SearchIssues(ctx, jql, epicFields)
+		rankedEpics, err = s.Client.SearchIssues(ctx, jql, epicFields, cached)
 		if err != nil {
 			return board.Board{}, fmt.Errorf("ordering the epics of board %d: %w", s.BoardID, err)
 		}
