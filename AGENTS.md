@@ -67,6 +67,7 @@ Tests must not touch the real password store: call `keyring.MockInit()` in any t
 - Ask before adding a `//nolint` directive, and only for a finding that `mise run lint` actually reports and that cannot be fixed.
 - Separate the steps of a long function with blank lines.
 - Write a comment only where a reader would otherwise misread the code; most choices need no explanation.
+- Change only what the task asks for; propose extra tests, checks, or safeguards instead of adding them.
 
 ## Decisions
 
