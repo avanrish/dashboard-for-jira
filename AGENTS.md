@@ -37,6 +37,7 @@ Put JavaScript that only one page uses in a `<script>` element in that page's te
 
 - `mise run dev` — run the server with live reload at http://127.0.0.1:7331
 - `mise run generate` — regenerate templ code and the Tailwind stylesheet. Run after editing `.templ` files or Tailwind classes, and commit the output; CI fails if it is stale.
+  Never edit `*_templ.go` or `internal/web/static/app.css` by hand, including through a search-and-replace across the repository: change the `.templ` or Tailwind source and run `mise run generate`.
 <!-- LINT.ThenChange(//README.md:web_ui) -->
 
 CI also runs checks that `mise run lint` does not: `typos`, `ifttt-lint`, and `gitleaks`. Their tools are pinned in `mise.ci.toml`; install them with `MISE_ENV=ci mise install`, then run `typos` and `ifttt-lint --diff 'main..@'` (`main...HEAD` with git) before pushing.
