@@ -1,55 +1,29 @@
-<!-- LINT.IfChange(project_header) -->
-# dashboard-for-jira
+# Instructions for AI agents
 
-A web dashboard for Jira.
-<!-- LINT.ThenChange(//README.md:project_header) -->
+`README.md` is written for people and is part of these instructions: read it before starting a task.
+It covers installing and configuring the app, the project structure, the development commands and which to run after a change, and how the web UI is built and styled.
+This file adds only what agents need on top of it.
 
-## Project structure
+## Architecture
 
-<!-- LINT.IfChange(project_structure) -->
-- `main.go` — the executable, at the repository root so `go install github.com/avanrish/dashboard-for-jira@latest` installs it; keep it thin and call into `internal/`
-- `internal/` — application code, not importable by other modules
-- `docs/decisions/` — architecture decision records explaining why the project is built the way it is
-- Tests live next to the code they test as `*_test.go` files, with fixtures in a package-local `testdata/`
-<!-- LINT.ThenChange(//README.md:project_structure) -->
+- `internal/board` is the dashboard's own model of a board.
+  `internal/jira` builds it from Jira's responses (`BoardSource`, mapped in `epics.go`), and `internal/web` renders it, knowing Jira only through its `BoardSource` interface: keep Jira's types out of `web` and `views`.
+- Jira returns only the issue fields a request names: to show a new field, also add it to `boardFields` in `internal/jira/board.go`.
+- Custom field IDs differ on every Jira site: look them up by schema type, as `CustomFields` in `internal/jira/endpoints.go` does, and never hard-code a `customfield_NNNNN` ID.
 
-## Commands
+## CI
 
-<!-- LINT.IfChange(commands) -->
-Run `mise install` to provision Go and the development tools pinned in `mise.toml`, then use mise tasks (`mise tasks` lists them):
-
-- `mise run fmt` — format Go code
-- `mise run lint` — formatting, `go.mod` tidiness, govulncheck, and golangci-lint. Always run after making changes.
-- `mise run test` — tests with the race detector
-- `mise run doc` — browse the documentation locally in the pkg.go.dev style
-<!-- LINT.ThenChange(//README.md:commands, //mise.toml:lint_task) -->
-
-## Web UI
-
-<!-- LINT.IfChange(web_ui) -->
-The server in `internal/web/` renders pages from templ components in `internal/web/views/`, each reusable component in its own file.
-They are styled with Tailwind classes, compiled from `internal/web/tailwind.css` into `internal/web/static/app.css`.
-Use only the colour roles defined in `internal/web/tailwind.css`, such as `bg-card`, `text-fg-muted`, and `border-line`.
-Tailwind's own palette is removed, so classes like `text-slate-500` produce nothing.
-Each role has a light and a dark value, so templates need no `dark:` classes; when no role fits, add one with both.
-Interactions that need no server round trip use Alpine.js, vendored in `internal/web/static/vendor/` with its version in the file name.
-Put JavaScript that only one page uses in a `<script>` element in that page's templ component, not in a file under `internal/web/static/`, which holds only the compiled stylesheet and vendored libraries.
-
-- `mise run dev` — run the server with live reload at http://127.0.0.1:7331
-- `mise run generate` — regenerate templ code and the Tailwind stylesheet. Run after editing `.templ` files or Tailwind classes, and commit the output; CI fails if it is stale.
-<!-- LINT.ThenChange(//README.md:web_ui) -->
-
-CI also runs checks that `mise run lint` does not: `typos`, `ifttt-lint`, and `gitleaks`. Their tools are pinned in `mise.ci.toml`; install them with `MISE_ENV=ci mise install`, then run `typos` and `ifttt-lint --diff 'main..@'` (`main...HEAD` with git) before pushing.
+CI also runs checks that `mise run lint` does not: `typos`, `ifttt-lint`, and `gitleaks`. Their tools are pinned in `mise.ci.toml`; install them with `MISE_ENV=ci mise install`, then run `typos` and `ifttt-lint --vcs git --diff main...HEAD` before pushing.
+In a jj repository, keep `--vcs git` as CI does, since ifttt-lint's jj mode reports a file as missing when one commit renames it and a later one changes it.
+Git's `HEAD` is `@-` there, so when `@` holds the work to check, replace `HEAD` with `$(jj log -r @ --no-graph -T commit_id)`.
 CI runs tests on Linux.
 
 ## Configuration
 
-<!-- LINT.IfChange(configuration) -->
-The app reads its settings from environment variables, which take precedence, and from `config.json` in `~/.config/dashboard-for-jira/` (`%AppData%` on Windows); the README lists them.
-The API token never goes in that file: it comes from `JIRA_API_TOKEN` or the system's password store, through `github.com/zalando/go-keyring`.
-`dashboard-for-jira configure` (`internal/configure/`) asks for every setting in the terminal, and `start` asks for the missing ones instead of failing; both check them with Jira before saving.
-Tests must not touch the real password store: call `keyring.MockInit()` in any test that reads or saves a token.
-<!-- LINT.ThenChange(//README.md:configuration) -->
+`internal/configure/` holds the prompts of `dashboard-for-jira configure` and `start`; both check the settings with Jira before saving them.
+The API token is read and saved through `github.com/zalando/go-keyring`.
+Tests must not touch the real password store or settings file: call `keyring.MockInit()` in any test that reads or saves a token, and keep `config.json` under `t.TempDir()`.
+Tests that load settings must also clear `JIRA_SITE`, `JIRA_EMAIL`, `JIRA_API_TOKEN`, `JIRA_BOARD_ID`, and `PORT` with `t.Setenv`, because variables set in the developer's shell override the file.
 
 ## Conventions
 

@@ -49,33 +49,33 @@ templ boardView(boardData board.Board, collapsed map[string]bool) {
 				</h2>
 			}
 		</div>
-		if len(boardData.Lanes) == 0 {
+		if len(boardData.Epics) == 0 {
 			<p class="mt-4 text-sm text-fg-muted">No issues on this board.</p>
 		}
-		for _, lane := range boardData.Lanes {
-			@epicLane(lane, collapsed[epicID(lane.Epic)])
+		for _, epic := range boardData.Epics {
+			@epicView(epic, collapsed[epicID(epic)])
 		}
 	</div>
 }
 
-// epicLane uses <details> so lanes collapse and expand without JavaScript.
-templ epicLane(lane board.Lane, collapsed bool) {
-	<details open?={ !collapsed } data-epic={ epicID(lane.Epic) } class="group mt-3">
+// epicView uses <details> so epics collapse and expand without JavaScript.
+templ epicView(epic board.Epic, collapsed bool) {
+	<details open?={ !collapsed } data-epic={ epicID(epic) } class="group mt-3">
 		<summary class="sticky left-6 flex w-fit cursor-pointer list-none items-center gap-2 py-1 text-sm [&::-webkit-details-marker]:hidden">
 			<svg class="size-4 shrink-0 text-fg-muted transition-transform group-open:rotate-90" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 				<path d="M6 3.5 10.5 8 6 12.5"></path>
 			</svg>
-			if lane.Epic.Key == "" {
+			if epic.Key == "" {
 				<span class="font-medium text-fg-muted">Issues without epic</span>
 			} else {
-				<span class={ "size-3.5 shrink-0 rounded-[3px]", epicClass(lane.Epic.Color) }></span>
-				<a href={ templ.URL(lane.Epic.URL) } target="_blank" rel="noopener noreferrer" class="font-mono text-xs text-fg-muted hover:underline">{ lane.Epic.Key }</a>
-				<span class="font-medium">{ lane.Epic.Summary }</span>
+				<span class={ "size-3.5 shrink-0 rounded-[3px]", epicClass(epic.Color) }></span>
+				<a href={ templ.URL(epic.URL) } target="_blank" rel="noopener noreferrer" class="font-mono text-xs text-fg-muted hover:underline">{ epic.Key }</a>
+				<span class="font-medium">{ epic.Summary }</span>
 			}
-			<span class="text-fg-muted">{ issueCount(lane.IssueCount()) }</span>
+			<span class="text-fg-muted">{ issueCount(epic.IssueCount()) }</span>
 		</summary>
 		<div class="mt-1 flex gap-2">
-			for _, issues := range lane.Cells {
+			for _, issues := range epic.Cells {
 				<ul class="flex min-h-10 w-50 shrink-0 flex-col gap-1.5 rounded-lg bg-column p-1.5">
 					for _, issue := range issues {
 						<li>
@@ -128,7 +128,7 @@ func epicClass(color string) string {
 	case "dark-orange":
 		return "bg-epic-dark-orange"
 	// LINT.ThenChange(
-	//     //internal/jira/lanes.go:epic_colors,
+	//     //internal/jira/epics.go:epic_colors,
 	//     //internal/web/tailwind.css:epic_colors,
 	// )
 	default:

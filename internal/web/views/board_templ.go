@@ -137,14 +137,14 @@ func boardView(boardData board.Board, collapsed map[string]bool) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if len(boardData.Lanes) == 0 {
+		if len(boardData.Epics) == 0 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<p class=\"mt-4 text-sm text-fg-muted\">No issues on this board.</p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		for _, lane := range boardData.Lanes {
-			templ_7745c5c3_Err = epicLane(lane, collapsed[epicID(lane.Epic)]).Render(ctx, templ_7745c5c3_Buffer)
+		for _, epic := range boardData.Epics {
+			templ_7745c5c3_Err = epicView(epic, collapsed[epicID(epic)]).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -157,8 +157,8 @@ func boardView(boardData board.Board, collapsed map[string]bool) templ.Component
 	})
 }
 
-// epicLane uses <details> so lanes collapse and expand without JavaScript.
-func epicLane(lane board.Lane, collapsed bool) templ.Component {
+// epicView uses <details> so epics collapse and expand without JavaScript.
+func epicView(epic board.Epic, collapsed bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -190,9 +190,9 @@ func epicLane(lane board.Lane, collapsed bool) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templruntime.NewAttributeExpression(epicID(lane.Epic)).Resolve(ctx)
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templruntime.NewAttributeExpression(epicID(epic)).Resolve(ctx)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/views/board.templ`, Line: 63, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/views/board.templ`, Line: 63, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 		if templ_7745c5c3_Err != nil {
@@ -202,7 +202,7 @@ func epicLane(lane board.Lane, collapsed bool) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if lane.Epic.Key == "" {
+		if epic.Key == "" {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<span class=\"font-medium text-fg-muted\">Issues without epic</span> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -216,7 +216,7 @@ func epicLane(lane board.Lane, collapsed bool) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var9 = []any{"size-3.5 shrink-0 rounded-[3px]", epicClass(lane.Epic.Color)}
+				var templ_7745c5c3_Var9 = []any{"size-3.5 shrink-0 rounded-[3px]", epicClass(epic.Color)}
 				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_ElementWriter, templ_7745c5c3_Var9...)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -249,9 +249,9 @@ func epicLane(lane board.Lane, collapsed bool) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var11 string
-			templ_7745c5c3_Var11, templ_7745c5c3_Err = templruntime.NewAttributeExpression(templ.URL(lane.Epic.URL)).ResolveURL(ctx)
+			templ_7745c5c3_Var11, templ_7745c5c3_Err = templruntime.NewAttributeExpression(templ.URL(epic.URL)).ResolveURL(ctx)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/views/board.templ`, Line: 72, Col: 38}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/views/board.templ`, Line: 72, Col: 33}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11)
 			if templ_7745c5c3_Err != nil {
@@ -262,9 +262,9 @@ func epicLane(lane board.Lane, collapsed bool) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var12 string
-			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(lane.Epic.Key)
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(epic.Key)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/views/board.templ`, Line: 72, Col: 154}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/views/board.templ`, Line: 72, Col: 144}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -275,9 +275,9 @@ func epicLane(lane board.Lane, collapsed bool) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var13 string
-			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(lane.Epic.Summary)
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(epic.Summary)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/views/board.templ`, Line: 73, Col: 49}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/views/board.templ`, Line: 73, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -293,7 +293,7 @@ func epicLane(lane board.Lane, collapsed bool) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var14 string
-		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(issueCount(lane.IssueCount()))
+		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(issueCount(epic.IssueCount()))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/views/board.templ`, Line: 75, Col: 62}
 		}
@@ -305,7 +305,7 @@ func epicLane(lane board.Lane, collapsed bool) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for _, issues := range lane.Cells {
+		for _, issues := range epic.Cells {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<ul class=\"flex min-h-10 w-50 shrink-0 flex-col gap-1.5 rounded-lg bg-column p-1.5\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -377,7 +377,7 @@ func epicClass(color string) string {
 	case "dark-orange":
 		return "bg-epic-dark-orange"
 	// LINT.ThenChange(
-	//     //internal/jira/lanes.go:epic_colors,
+	//     //internal/jira/epics.go:epic_colors,
 	//     //internal/web/tailwind.css:epic_colors,
 	// )
 	default:

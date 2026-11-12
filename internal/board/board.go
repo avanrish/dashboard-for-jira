@@ -4,20 +4,16 @@ package board
 type Board struct {
 	Name    string
 	Columns []string
-	Lanes   []Lane // one per epic, then one for issues without an epic
+	Epics   []Epic // one per epic, then one without a Key for issues that have no epic
 }
 
-// Lane holds the issues of one epic, split by column.
-type Lane struct {
-	Epic  Epic      // zero for the lane of issues without an epic
-	Cells [][]Issue // indexed like Board.Columns
-}
-
+// Epic holds the issues of one epic, split by column.
 type Epic struct {
 	Key     string
 	Summary string
 	URL     string
-	Color   string // one of Jira's epic colours, such as "purple" or "dark-teal"; empty when unset
+	Color   string    // one of Jira's epic colours, such as "purple" or "dark-teal"; empty when unset
+	Cells   [][]Issue // indexed like Board.Columns
 }
 
 type Issue struct {
@@ -43,9 +39,9 @@ const (
 	Done
 )
 
-func (l Lane) IssueCount() int {
+func (e Epic) IssueCount() int {
 	count := 0
-	for _, issues := range l.Cells {
+	for _, issues := range e.Cells {
 		count += len(issues)
 	}
 	return count
@@ -53,8 +49,8 @@ func (l Lane) IssueCount() int {
 
 func (b Board) ColumnIssueCount(column int) int {
 	count := 0
-	for _, lane := range b.Lanes {
-		count += len(lane.Cells[column])
+	for _, epic := range b.Epics {
+		count += len(epic.Cells[column])
 	}
 	return count
 }

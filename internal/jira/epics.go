@@ -58,8 +58,8 @@ func epicsByIssue(issues, parents []Issue) map[string]*Parent {
 	return epics
 }
 
-// buildBoard puts each issue in its status's column and its epic's lane.
-// Only epics with issues get a lane, ordered like rankedEpics, which also holds their colours.
+// buildBoard puts each issue in its status's column under its epic.
+// Only epics with issues are shown, ordered like rankedEpics, which also holds their colours.
 func buildBoard(
 	name string, columns []BoardColumn, issues []Issue, epics map[string]*Parent, rankedEpics []Issue,
 	customFields CustomFields, issueURL func(key string) string,
@@ -80,30 +80,28 @@ func buildBoard(
 		colorOfEpic[epic.ID] = epicColor(epic.Fields.All[customFields.IssueColor])
 	}
 
-	laneOfEpic := make(map[string]*board.Lane)
+	boardEpics := make(map[string]*board.Epic)
 	var epicIDs []string
-	withoutEpic := &board.Lane{Cells: make([][]board.Issue, len(columns))}
+	withoutEpic := &board.Epic{Cells: make([][]board.Issue, len(columns))}
 	for _, issue := range issues {
 		column, onBoard := columnOfStatus[issue.Fields.Status.ID]
 		if !onBoard || issue.Fields.IssueType.HierarchyLevel == epicLevel {
 			continue
 		}
-		lane := withoutEpic
-		if epic := epics[issue.Key]; epic != nil {
-			lane = laneOfEpic[epic.ID]
-			if lane == nil {
-				lane = &board.Lane{
-					Epic: board.Epic{
-						Key: epic.Key, Summary: epic.Fields.Summary, URL: issueURL(epic.Key),
-						Color: colorOfEpic[epic.ID],
-					},
+		epic := withoutEpic
+		if parent := epics[issue.Key]; parent != nil {
+			epic = boardEpics[parent.ID]
+			if epic == nil {
+				epic = &board.Epic{
+					Key: parent.Key, Summary: parent.Fields.Summary, URL: issueURL(parent.Key),
+					Color: colorOfEpic[parent.ID],
 					Cells: make([][]board.Issue, len(columns)),
 				}
-				laneOfEpic[epic.ID] = lane
-				epicIDs = append(epicIDs, epic.ID)
+				boardEpics[parent.ID] = epic
+				epicIDs = append(epicIDs, parent.ID)
 			}
 		}
-		lane.Cells[column] = append(lane.Cells[column], cardOf(issue, customFields.Team, issueURL))
+		epic.Cells[column] = append(epic.Cells[column], cardOf(issue, customFields.Team, issueURL))
 	}
 
 	position := func(epicID string) int {
@@ -114,10 +112,10 @@ func buildBoard(
 	}
 	slices.SortStableFunc(epicIDs, func(a, b string) int { return cmp.Compare(position(a), position(b)) })
 	for _, id := range epicIDs {
-		result.Lanes = append(result.Lanes, *laneOfEpic[id])
+		result.Epics = append(result.Epics, *boardEpics[id])
 	}
 	if withoutEpic.IssueCount() > 0 {
-		result.Lanes = append(result.Lanes, *withoutEpic)
+		result.Epics = append(result.Epics, *withoutEpic)
 	}
 	return result
 }

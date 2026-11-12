@@ -22,7 +22,7 @@ var boardFields = []string{"summary", "status", "issuetype", "priority", "assign
 // recentlyDone hides finished issues not updated for 7 days, as the board in Jira does, which keeps long-lived boards short.
 const recentlyDone = "statusCategory != Done OR updated >= -7d"
 
-// BoardSource loads a Jira board with its issues grouped into epic lanes, as the board in Jira shows them.
+// BoardSource loads a Jira board with its issues grouped by epic, as the board in Jira shows them.
 type BoardSource struct {
 	Client  *Client
 	BoardID int

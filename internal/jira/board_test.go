@@ -119,7 +119,7 @@ func newBoardServer(t *testing.T) (*httptest.Server, func(path string) int) {
 	}
 }
 
-func TestBoardGroupsIssuesIntoEpicLanes(t *testing.T) {
+func TestBoardGroupsIssuesByEpic(t *testing.T) {
 	server, _ := newBoardServer(t)
 	source := BoardSource{Client: newTestClient(t, server.URL), BoardID: 7}
 	got, err := source.Board(t.Context())
@@ -130,20 +130,20 @@ func TestBoardGroupsIssuesIntoEpicLanes(t *testing.T) {
 	if got.Name != "Team board" || !slices.Equal(got.Columns, []string{"To Do", "In Progress", "Done"}) {
 		t.Errorf("board = %q with columns %q", got.Name, got.Columns)
 	}
-	var lanes []string
-	for _, lane := range got.Lanes {
-		lanes = append(lanes, describeLane(lane))
+	var epics []string
+	for _, epic := range got.Epics {
+		epics = append(epics, describeEpic(epic))
 	}
-	// Lanes follow epic rank, and the empty epic DASH-10 gets none.
-	wantLanes := []string{
+	// Epics follow their rank, and the empty epic DASH-10 is left out.
+	wantEpics := []string{
 		"DASH-9 Speed up CI: [DASH-5] [DASH-7] []",
 		"DASH-1 Auth revamp: [DASH-2] [DASH-4] []",
 		" : [] [] [DASH-3]",
 	}
-	if !slices.Equal(lanes, wantLanes) {
-		t.Errorf("lanes =\n%s\nwant\n%s", strings.Join(lanes, "\n"), strings.Join(wantLanes, "\n"))
+	if !slices.Equal(epics, wantEpics) {
+		t.Errorf("epics =\n%s\nwant\n%s", strings.Join(epics, "\n"), strings.Join(wantEpics, "\n"))
 	}
-	if colors := []string{got.Lanes[0].Epic.Color, got.Lanes[1].Epic.Color}; !slices.Equal(colors, []string{"purple", "teal"}) {
+	if colors := []string{got.Epics[0].Color, got.Epics[1].Color}; !slices.Equal(colors, []string{"purple", "teal"}) {
 		t.Errorf("epic colours = %q, want purple and teal", colors)
 	}
 	cardURL, err := url.JoinPath(server.URL, "browse", "DASH-3")
@@ -154,7 +154,7 @@ func TestBoardGroupsIssuesIntoEpicLanes(t *testing.T) {
 		Key: "DASH-3", Summary: "Fix login", Type: "Bug", Status: "Done", StatusCategory: board.Done,
 		Priority: "High", Assignee: "Ada Lovelace", Team: "Platform", Flagged: true, URL: cardURL,
 	}
-	if card := got.Lanes[2].Cells[2][0]; card != wantCard {
+	if card := got.Epics[2].Cells[2][0]; card != wantCard {
 		t.Errorf("card = %+v, want %+v", card, wantCard)
 	}
 }
@@ -200,14 +200,14 @@ func TestBoardErrorExplainsAFailureOnce(t *testing.T) {
 	}
 }
 
-func describeLane(lane board.Lane) string {
+func describeEpic(epic board.Epic) string {
 	var cells []string
-	for _, issues := range lane.Cells {
+	for _, issues := range epic.Cells {
 		var keys []string
 		for _, issue := range issues {
 			keys = append(keys, issue.Key)
 		}
 		cells = append(cells, fmt.Sprintf("[%s]", strings.Join(keys, " ")))
 	}
-	return fmt.Sprintf("%s %s: %s", lane.Epic.Key, lane.Epic.Summary, strings.Join(cells, " "))
+	return fmt.Sprintf("%s %s: %s", epic.Key, epic.Summary, strings.Join(cells, " "))
 }

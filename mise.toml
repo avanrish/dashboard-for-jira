@@ -19,7 +19,6 @@ description = "Run golangci-lint and all checks"
 depends = ["check-fmt", "check-mod", "vulncheck"]
 run = "golangci-lint run"
 # LINT.ThenChange(
-#     //AGENTS.md:commands,
 #     //README.md:commands,
 #     //.github/workflows/ci.yaml:golangci_lint,
 # )
@@ -72,4 +71,12 @@ run = "go doc -http"
 
 [tasks.check-commits]
 description = "Check that commits since main follow Conventional Commits"
-run = "committed main..HEAD"
+# jj leaves git's HEAD at @-, so check @ too once it has a description; an empty one, such as `jj commit` leaves, is skipped.
+run = '''
+if [ -d .jj ]; then
+  head=$(jj log --no-graph -r 'coalesce(@ ~ description(exact:""), @-)' -T commit_id)
+else
+  head=HEAD
+fi
+committed "main..$head"
+'''
