@@ -19,7 +19,6 @@ description = "Run golangci-lint and all checks"
 depends = ["check-fmt", "check-mod", "vulncheck"]
 run = "golangci-lint run"
 # LINT.ThenChange(
-#     //AGENTS.md:commands,
 #     //README.md:commands,
 #     //.github/workflows/ci.yaml:golangci_lint,
 # )

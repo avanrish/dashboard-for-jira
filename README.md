@@ -1,8 +1,6 @@
-<!-- LINT.IfChange(project_header) -->
 # dashboard-for-jira
 
 A web dashboard for Jira.
-<!-- LINT.ThenChange(//AGENTS.md:project_header) -->
 
 ## Install
 
@@ -29,12 +27,10 @@ Run `dashboard-for-jira` on its own to list the commands.
 
 ## Project structure
 
-<!-- LINT.IfChange(project_structure) -->
 - `main.go` — the executable, at the repository root so `go install github.com/avanrish/dashboard-for-jira@latest` installs it; keep it thin and call into `internal/`
 - `internal/` — application code, not importable by other modules
 - `docs/decisions/` — architecture decision records explaining why the project is built the way it is
 - Tests live next to the code they test as `*_test.go` files, with fixtures in a package-local `testdata/`
-<!-- LINT.ThenChange(//AGENTS.md:project_structure) -->
 
 ## Commands
 
@@ -45,11 +41,10 @@ Run `mise install` to provision Go and the development tools pinned in `mise.tom
 - `mise run lint` — formatting, `go.mod` tidiness, govulncheck, and golangci-lint. Always run after making changes.
 - `mise run test` — tests with the race detector
 - `mise run doc` — browse the documentation locally in the pkg.go.dev style
-<!-- LINT.ThenChange(//AGENTS.md:commands, //mise.toml:lint_task) -->
+<!-- LINT.ThenChange(//mise.toml:lint_task) -->
 
 ## Web UI
 
-<!-- LINT.IfChange(web_ui) -->
 The server in `internal/web/` renders pages from templ components in `internal/web/views/`, each reusable component in its own file.
 They are styled with Tailwind classes, compiled from `internal/web/tailwind.css` into `internal/web/static/app.css`.
 Use only the colour roles defined in `internal/web/tailwind.css`, such as `bg-card`, `text-fg-muted`, and `border-line`.
@@ -61,11 +56,9 @@ Put JavaScript that only one page uses in a `<script>` element in that page's te
 - `mise run dev` — run the server with live reload at http://127.0.0.1:7331
 - `mise run generate` — regenerate templ code and the Tailwind stylesheet. Run after editing `.templ` files or Tailwind classes, and commit the output; CI fails if it is stale.
   Never edit `*_templ.go` or `internal/web/static/app.css` by hand, including through a search-and-replace across the repository: change the `.templ` or Tailwind source and run `mise run generate`.
-<!-- LINT.ThenChange(//AGENTS.md:web_ui) -->
 
 ## Configuration
 
-<!-- LINT.IfChange(configuration) -->
 `dashboard-for-jira start` asks for missing settings and `dashboard-for-jira configure` changes them; you can also edit the file yourself.
 The app reads them from environment variables and from a settings file, `config.json`:
 
@@ -94,7 +87,6 @@ Create one at <https://id.atlassian.com/manage-profile/security/api-tokens>; it 
 The app reads it from the `JIRA_API_TOKEN` environment variable, or else from the system's password store: Keychain on macOS, Credential Manager on Windows, or the Secret Service, such as GNOME Keyring or KWallet, on Linux.
 There it is saved under the service `dashboard-for-jira` and your email address.
 On a machine without a password store, such as a server without a desktop session, set `JIRA_API_TOKEN` in the environment.
-<!-- LINT.ThenChange(//AGENTS.md:configuration) -->
 
 ## License
 
