@@ -43,7 +43,7 @@ Jira Cloud rate-limits API calls and returns `429` with a `Retry-After` header w
 ## Consequences
 
 - Cards show Jira's current state within one polling interval, with no sync to debug.
-  Lanes and columns can lag by a few minutes after someone reorders epics or changes the board's settings.
+  Epics and columns can lag by a few minutes after someone reorders epics or changes the board's settings.
 - Each page load or poll costs a few API calls, which is far below Jira's rate limits for one user.
   Load time depends on Jira's response time, mostly for the board's issues.
 - Fields to show must be listed explicitly, so new UI features need client changes.

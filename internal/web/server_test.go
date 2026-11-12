@@ -68,9 +68,9 @@ func TestCrossOriginWritesRejected(t *testing.T) {
 func TestCollapsedEpicsRenderClosed(t *testing.T) {
 	source := fixedSource{
 		Columns: []string{"To Do"},
-		Lanes: []board.Lane{
-			{Epic: board.Epic{Key: "ABC-1"}, Cells: [][]board.Issue{nil}},
-			{Epic: board.Epic{Key: "ABC-2"}, Cells: [][]board.Issue{nil}},
+		Epics: []board.Epic{
+			{Key: "ABC-1", Cells: [][]board.Issue{nil}},
+			{Key: "ABC-2", Cells: [][]board.Issue{nil}},
 			{Cells: [][]board.Issue{nil}},
 		},
 	}
