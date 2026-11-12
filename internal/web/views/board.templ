@@ -7,19 +7,38 @@ import (
 	"github.com/avanrish/dashboard-for-jira/internal/board"
 )
 
-templ BoardPage(boardData board.Board) {
+templ BoardPage(boardData board.Board, collapsed map[string]bool) {
 	@layout(fmt.Sprintf("%s · Dashboard for Jira", boardData.Name)) {
 		<header class="flex items-center gap-4 border-b border-line bg-surface px-6 py-3">
 			<h1 class="text-lg font-semibold">{ boardData.Name }</h1>
 		</header>
 		<main class="min-h-0 flex-1 overflow-auto">
-			@boardView(boardData)
+			@boardView(boardData, collapsed)
 		</main>
+		<script>
+			document.addEventListener("alpine:init", () => {
+				Alpine.data("epics", () => ({
+					save(event) {
+						const epic = event.target.dataset.epic;
+						// LINT.IfChange(collapsed_epics_cookie)
+						const cookie = document.cookie.split("; ").find((c) => c.startsWith("collapsed_epics="));
+						const collapsed = new Set(cookie?.slice("collapsed_epics=".length).split(",").filter(Boolean));
+						if (event.target.open) {
+							collapsed.delete(epic);
+						} else {
+							collapsed.add(epic);
+						}
+						document.cookie = `collapsed_epics=${[...collapsed].join(",")}; Path=/; Max-Age=31536000; SameSite=Lax`;
+						// LINT.ThenChange(//internal/web/server.go:collapsed_epics_cookie)
+					},
+				}));
+			});
+		</script>
 	}
 }
 
-templ boardView(boardData board.Board) {
-	<div class="w-max min-w-full px-6 pb-6">
+templ boardView(boardData board.Board, collapsed map[string]bool) {
+	<div class="w-max min-w-full px-6 pb-6" x-data="epics" @toggle.capture="save">
 		<div class="sticky top-0 z-10 flex gap-2 bg-page pt-4 pb-1">
 			for i, name := range boardData.Columns {
 				<h2 class="flex w-50 shrink-0 items-center justify-between rounded-lg bg-column px-2.5 py-1.5 text-xs font-semibold tracking-wide text-fg-muted uppercase">
@@ -34,14 +53,14 @@ templ boardView(boardData board.Board) {
 			<p class="mt-4 text-sm text-fg-muted">No issues on this board.</p>
 		}
 		for _, lane := range boardData.Lanes {
-			@epicLane(lane)
+			@epicLane(lane, collapsed[epicID(lane.Epic)])
 		}
 	</div>
 }
 
 // epicLane uses <details> so lanes collapse and expand without JavaScript.
-templ epicLane(lane board.Lane) {
-	<details open class="group mt-3">
+templ epicLane(lane board.Lane, collapsed bool) {
+	<details open?={ !collapsed } data-epic={ epicID(lane.Epic) } class="group mt-3">
 		<summary class="sticky left-6 flex w-fit cursor-pointer list-none items-center gap-2 py-1 text-sm [&::-webkit-details-marker]:hidden">
 			<svg class="size-4 shrink-0 text-fg-muted transition-transform group-open:rotate-90" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 				<path d="M6 3.5 10.5 8 6 12.5"></path>
@@ -67,6 +86,13 @@ templ epicLane(lane board.Lane) {
 			}
 		</div>
 	</details>
+}
+
+func epicID(epic board.Epic) string {
+	if epic.Key == "" {
+		return "no-epic"
+	}
+	return epic.Key
 }
 
 // epicClass fills an epic's square with its colour from Jira; epics without one use the epic role.

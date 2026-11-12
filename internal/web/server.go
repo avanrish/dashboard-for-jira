@@ -6,6 +6,7 @@ import (
 	"embed"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/a-h/templ"
@@ -49,8 +50,22 @@ func (s *server) handlePage(w http.ResponseWriter, r *http.Request) {
 		s.render(w, r, http.StatusInternalServerError, views.ErrorPage(err.Error()))
 	default:
 		s.logger.InfoContext(r.Context(), "loaded the board", "duration", duration)
-		s.render(w, r, http.StatusOK, views.BoardPage(boardData))
+		s.render(w, r, http.StatusOK, views.BoardPage(boardData, collapsedEpics(r)))
 	}
+}
+
+func collapsedEpics(r *http.Request) map[string]bool {
+	// LINT.IfChange(collapsed_epics_cookie)
+	cookie, err := r.Cookie("collapsed_epics")
+	if err != nil {
+		return nil
+	}
+	collapsed := map[string]bool{}
+	for id := range strings.SplitSeq(cookie.Value, ",") {
+		collapsed[id] = true
+	}
+	// LINT.ThenChange(//internal/web/views/board.templ:collapsed_epics_cookie)
+	return collapsed
 }
 
 // render buffers the output so a template error becomes a clean 500, not a truncated page.
