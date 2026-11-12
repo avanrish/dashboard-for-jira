@@ -57,7 +57,7 @@
   --color-epic-gray: #6b778c;
   --color-epic-dark-green: #128759;
   --color-epic-dark-orange: #dd350d;
-  /* LINT.ThenChange(//internal/jira/lanes.go:epic_colors, //internal/web/views/board.templ:epic_colors) */
+  /* LINT.ThenChange(//internal/jira/epics.go:epic_colors, //internal/web/views/board.templ:epic_colors) */
 }
 
 /* Not `@theme inline`: that copies the light values into the classes, and this block would have no effect. */

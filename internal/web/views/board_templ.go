@@ -377,7 +377,7 @@ func epicClass(color string) string {
 	case "dark-orange":
 		return "bg-epic-dark-orange"
 	// LINT.ThenChange(
-	//     //internal/jira/lanes.go:epic_colors,
+	//     //internal/jira/epics.go:epic_colors,
 	//     //internal/web/tailwind.css:epic_colors,
 	// )
 	default:
