@@ -4,16 +4,26 @@
 It covers installing and configuring the app, the project structure, the development commands and which to run after a change, and how the web UI is built and styled.
 This file adds only what agents need on top of it.
 
+## Architecture
+
+- `internal/board` is the dashboard's own model of a board.
+  `internal/jira` builds it from Jira's responses (`BoardSource`, mapped in `epics.go`), and `internal/web` renders it, knowing Jira only through its `BoardSource` interface: keep Jira's types out of `web` and `views`.
+- Jira returns only the issue fields a request names: to show a new field, also add it to `boardFields` in `internal/jira/board.go`.
+- Custom field IDs differ on every Jira site: look them up by schema type, as `CustomFields` in `internal/jira/endpoints.go` does, and never hard-code a `customfield_NNNNN` ID.
+
 ## CI
 
-CI also runs checks that `mise run lint` does not: `typos`, `ifttt-lint`, and `gitleaks`. Their tools are pinned in `mise.ci.toml`; install them with `MISE_ENV=ci mise install`, then run `typos` and `ifttt-lint --diff 'main..@'` (`main...HEAD` with git) before pushing.
+CI also runs checks that `mise run lint` does not: `typos`, `ifttt-lint`, and `gitleaks`. Their tools are pinned in `mise.ci.toml`; install them with `MISE_ENV=ci mise install`, then run `typos` and `ifttt-lint --vcs git --diff main...HEAD` before pushing.
+In a jj repository, keep `--vcs git` as CI does, since ifttt-lint's jj mode reports a file as missing when one commit renames it and a later one changes it.
+Git's `HEAD` is `@-` there, so when `@` holds the work to check, replace `HEAD` with `$(jj log -r @ --no-graph -T commit_id)`.
 CI runs tests on Linux.
 
 ## Configuration
 
 `internal/configure/` holds the prompts of `dashboard-for-jira configure` and `start`; both check the settings with Jira before saving them.
 The API token is read and saved through `github.com/zalando/go-keyring`.
-Tests must not touch the real password store: call `keyring.MockInit()` in any test that reads or saves a token.
+Tests must not touch the real password store or settings file: call `keyring.MockInit()` in any test that reads or saves a token, and keep `config.json` under `t.TempDir()`.
+Tests that load settings must also clear `JIRA_SITE`, `JIRA_EMAIL`, `JIRA_API_TOKEN`, `JIRA_BOARD_ID`, and `PORT` with `t.Setenv`, because variables set in the developer's shell override the file.
 
 ## Conventions
 
