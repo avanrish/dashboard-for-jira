@@ -21,7 +21,23 @@
     minimumReleaseAge: null,
   },
   postUpdateOptions: ['gomodTidy'],
+  customManagers: [
+    {
+      // Alpine.js is vendored with its version in the file name.
+      customType: 'regex',
+      managerFilePatterns: ['internal/web/views/*.templ', 'internal/web/views/*_templ.go'],
+      matchStrings: ['alpine-(?<currentValue>\\d+\\.\\d+\\.\\d+)\\.min\\.js'],
+      depNameTemplate: 'alpinejs',
+      datasourceTemplate: 'npm',
+    },
+  ],
   packageRules: [
+    {
+      matchDepNames: ['alpinejs'],
+      prBodyNotes: [
+        'Renovate only bumps the reference. Replace the vendored file before merging:\n\n```sh\ncurl -fsSL -o internal/web/static/vendor/alpine-{{{newVersion}}}.min.js https://cdn.jsdelivr.net/npm/alpinejs@{{{newVersion}}}/dist/cdn.min.js\nrm internal/web/static/vendor/alpine-{{{currentVersion}}}.min.js\n```',
+      ],
+    },
     {
       // go.mod and mise.toml pin the same Go version; update them together.
       groupName: 'Go',

@@ -32,6 +32,8 @@ They are styled with Tailwind classes, compiled from `internal/web/tailwind.css`
 Use only the colour roles defined in `internal/web/tailwind.css`, such as `bg-card`, `text-fg-muted`, and `border-line`.
 Tailwind's own palette is removed, so classes like `text-slate-500` produce nothing.
 Each role has a light and a dark value, so templates need no `dark:` classes; when no role fits, add one with both.
+Interactions that need no server round trip use Alpine.js, vendored in `internal/web/static/vendor/` with its version in the file name.
+Put JavaScript that only one page uses in a `<script>` element in that page's templ component, not in a file under `internal/web/static/`, which holds only the compiled stylesheet and vendored libraries.
 
 - `mise run dev` — run the server with live reload at http://127.0.0.1:7331
 - `mise run generate` — regenerate templ code and the Tailwind stylesheet. Run after editing `.templ` files or Tailwind classes, and commit the output; CI fails if it is stale.
@@ -56,6 +58,7 @@ Tests must not touch the real password store: call `keyring.MockInit()` in any t
 <!-- LINT.ThenChange(//committed.toml:commit_subject) -->
 - Use narrow `LINT.IfChange` / `LINT.ThenChange` directives when duplicated cross-file content must stay in sync and cannot be eliminated.
   Write targets as repository-root paths starting with `//` (e.g. `//mise.toml:go_version`); ifttt-lint enforces them in CI.
+  Put them inside the declaration they guard, around only the lines that must stay in sync; placed directly above a declaration, Go reads them as its doc comment.
 - Prefer building strings from parts with `fmt.Sprintf`, and errors with `fmt.Errorf`, over joining them with `+`; this includes expressions in `.templ` files.
   Appending a piece to a string with `+=` is fine.
   Prefer building URLs with `net/url` (`url.URL`, `JoinPath`, `url.Values`).
@@ -64,6 +67,7 @@ Tests must not touch the real password store: call `keyring.MockInit()` in any t
 - Ask before adding a `//nolint` directive, and only for a finding that `mise run lint` actually reports and that cannot be fixed.
 - Separate the steps of a long function with blank lines.
 - Write a comment only where a reader would otherwise misread the code; most choices need no explanation.
+- Change only what the task asks for; propose extra tests, checks, or safeguards instead of adding them.
 
 ## Decisions
 

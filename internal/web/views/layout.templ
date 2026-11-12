@@ -8,6 +8,7 @@ templ layout(title string) {
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
 			<title>{ title }</title>
 			<link rel="stylesheet" href="/static/app.css"/>
+			<script defer src="/static/vendor/alpine-3.17.5.min.js"></script>
 		</head>
 		<body class="flex h-full flex-col bg-page text-fg antialiased">
 			{ children... }
