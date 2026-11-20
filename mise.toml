@@ -3,7 +3,7 @@
 go = "1.27.4"
 # LINT.ThenChange(//go.mod:go_version)
 # LINT.IfChange(committed_version)
-committed = "1.1.11"
+committed = "1.1.12"
 # LINT.ThenChange(//.github/workflows/committed.yaml:committed_version)
 golangci-lint = "2.15.0"
 "go:golang.org/x/vuln/cmd/govulncheck" = { version = "1.9.0", depends = "go" }
