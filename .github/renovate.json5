@@ -1,62 +1,89 @@
 {
-  extends: ["config:recommended", "helpers:pinGitHubActionDigests"],
+  extends: [
+    'config:recommended',
+    'helpers:pinGitHubActionDigests',
+  ],
   schedule: [
     'before 5am on the first day of the month',
   ],
-  // Give the ecosystem time to spot and yank a compromised release.
   minimumReleaseAge: '3 days',
   minimumReleaseAgeBehaviour: 'timestamp-required',
   internalChecksFilter: 'strict',
-  // Commit messages must pass committed: Conventional Commits, capitalized.
   semanticCommits: 'enabled',
   commitMessageLowerCase: 'never',
   configMigration: true,
-  dependencyDashboard: true,
-  // Find vulnerable dependencies through OSV, which includes the Go
-  // vulnerability database, instead of relying on Dependabot alerts.
+  dependencyDashboard: {
+    enabled: true,
+  },
   osvVulnerabilityAlerts: true,
-  // Security fixes skip the schedule and the waiting period.
   vulnerabilityAlerts: {
-    schedule: ['at any time'],
+    schedule: [
+      'at any time',
+    ],
     minimumReleaseAge: null,
   },
-  postUpdateOptions: ['gomodTidy'],
+  postUpdateOptions: [
+    'gomodTidy',
+  ],
   customManagers: [
     {
-      // Alpine.js is vendored with its version in the file name.
       customType: 'regex',
-      managerFilePatterns: ['internal/web/views/*.templ', 'internal/web/views/*_templ.go'],
-      matchStrings: ['alpine-(?<currentValue>\\d+\\.\\d+\\.\\d+)\\.min\\.js'],
+      managerFilePatterns: [
+        'internal/web/views/*.templ',
+        'internal/web/views/*_templ.go',
+      ],
+      matchStrings: [
+        'alpine-(?<currentValue>\\d+\\.\\d+\\.\\d+)\\.min\\.js',
+      ],
       depNameTemplate: 'alpinejs',
       datasourceTemplate: 'npm',
     },
   ],
   packageRules: [
     {
-      matchDepNames: ['alpinejs'],
+      matchDepNames: [
+        'alpinejs',
+      ],
       prBodyNotes: [
         'Renovate only bumps the reference. Replace the vendored file before merging:\n\n```sh\ncurl -fsSL -o internal/web/static/vendor/alpine-{{{newVersion}}}.min.js https://cdn.jsdelivr.net/npm/alpinejs@{{{newVersion}}}/dist/cdn.min.js\nrm internal/web/static/vendor/alpine-{{{currentVersion}}}.min.js\n```',
       ],
     },
     {
-      // go.mod and mise.toml pin the same Go version; update them together.
       groupName: 'Go',
-      matchDepNames: ['go'],
+      matchDepNames: [
+        'go',
+      ],
     },
     {
-      // committed is pinned in mise.toml and committed.yaml; update them together.
       groupName: 'committed',
-      matchPackageNames: ['crate-ci/committed', 'committed'],
+      matchPackageNames: [
+        'crate-ci/committed',
+        'committed',
+      ],
     },
     {
-      matchManagers: ['github-actions'],
-      matchUpdateTypes: ['minor', 'patch', 'digest'],
+      matchManagers: [
+        'github-actions',
+      ],
+      matchUpdateTypes: [
+        'minor',
+        'patch',
+        'digest',
+      ],
       groupName: 'compatible (actions)',
     },
     {
-      matchManagers: ['mise'],
-      matchDepNames: ['!go', '!committed'],
-      matchUpdateTypes: ['minor', 'patch'],
+      matchManagers: [
+        'mise',
+      ],
+      matchDepNames: [
+        '!go',
+        '!committed',
+      ],
+      matchUpdateTypes: [
+        'minor',
+        'patch',
+      ],
       groupName: 'compatible (mise)',
     },
   ],
